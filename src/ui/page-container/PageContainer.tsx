@@ -32,7 +32,7 @@ export const PAGE_FILL_Y = "pt-5 max-md:pt-2 pb-6 max-md:pb-4 max-sm:pb-3";
 
 /**
  * 전 페이지 공통 중앙 정렬 리딩 컬럼.
- * 폭은 globals.css `@theme`의 `--container-max`(1024px)를 단일 진실 소스로 사용.
+ * 폭은 tokens.css의 `--page-max`(1024px)를 단일 진실 소스로 사용.
  * 기존 페이지들이 쓰던 수평 간격을 컨테이너가 흡수한다 (좌우 인셋은 `PAGE_INSET_X`).
  */
 export function PageContainer({
@@ -46,7 +46,7 @@ export function PageContainer({
 }) {
   return (
     <Tag
-      className={`mx-auto w-full max-w-[var(--container-max)] ${PAGE_INSET_X} ${className}`}
+      className={`mx-auto w-full max-w-[var(--page-max)] ${PAGE_INSET_X} ${className}`}
     >
       {children}
     </Tag>

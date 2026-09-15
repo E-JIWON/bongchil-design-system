@@ -37,6 +37,12 @@ for (const file of FILES) {
   }
 }
 
+// Tailwind 네임스페이스 토큰이 키워드 유틸을 덮는 이름 — `--container-max`가 `w-max`를 1024px로 만든 적 있다
+const tokens = readFileSync("src/tokens.css", "utf8");
+for (const m of tokens.matchAll(/--(container|width|spacing)-(max|min|fit|full|auto|screen|px)\s*:/g)) {
+  fail(`src/tokens.css: --${m[1]}-${m[2]} 가 Tailwind 키워드 유틸(w-${m[2]} 등)을 덮는다`);
+}
+
 // 컴포넌트도 데모도 안 쓰는 embed 규칙
 const components = readFileSync("src/components.css", "utf8");
 const code = ["src/ui", "src/lib", "demo/src"]

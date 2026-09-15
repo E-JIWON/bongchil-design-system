@@ -40,7 +40,7 @@ export {
   hasCategoryIcon,
 } from "./ui/category-icon";
 
-// ── 임베드 카드 (표지 · CD · 본문 한 줄 — 09.14 디자인) ──
+// ── 임베드 카드 (표지 · CD · 본문 한 줄) ──
 export { EmbedCard, EmbedSpecMount, VideoEmbed } from "./ui/embed-card";
 export { blockCardSpec, lineSpec, readEmbedData, renderEmbedSpec } from "./lib/embed-markup";
 export type { EmbedCardData, EmbedSpec } from "./lib/embed-markup";
@@ -90,6 +90,7 @@ export * from "./ui/cover-frame";
 export * from "./ui/date-range-text";
 export * from "./ui/dock-popover";
 export * from "./ui/filter-chips";
+export * from "./ui/segmented";
 export * from "./ui/heart-rating";
 export * from "./ui/month-picker";
 export * from "./ui/notice-area";

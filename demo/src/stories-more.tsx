@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Inbox, LayoutGrid, Sparkles, StickyNote } from "lucide-react";
+import { AlignCenter, AlignLeft, AlignRight, Inbox, LayoutGrid, Sparkles, StickyNote } from "lucide-react";
 import {
   BottomSheet,
   Button,
@@ -20,6 +20,7 @@ import {
   PaletteBlobs,
   PostItCard,
   RecommendationIcon,
+  Segmented,
   Skeleton,
   StickerPhotoButton,
   WEATHER_KEYS,
@@ -45,6 +46,21 @@ export const MORE_STORIES: Story[] = [
     notes: ["화면 상단 필터 칩 줄의 단일 표준", "공용 Button(grain) md 고정", "색을 안 준 항목은 ink"],
     render: () => <FilterChipsDemo />,
     code: () => `<FilterChips items={ITEMS} value={filter} onChange={setFilter} />`,
+  },
+
+  {
+    id: "segmented",
+    group: "컨트롤",
+    name: "Segmented",
+    notes: [
+      "작은 자리에서 「여럿 중 하나」를 고르는 눌린 칸 막대 — 고른 칸만 흰 종이로 떠오른다",
+      "뜻이 다른 묶음은 groups로 나누면 가는 세로선이 들어간다",
+      "누를 때 에디터 선택이 안 풀린다 (mousedown 기본동작을 막음). 화면 상단 필터는 FilterChips",
+    ],
+    controls: [{ key: "정렬 묶음", type: "bool" }],
+    initial: { "정렬 묶음": true },
+    render: (p) => <SegmentedDemo withAlign={Boolean(p["정렬 묶음"])} />,
+    code: () => `<Segmented\n  groups={[\n    { items: FORMATS, value: format, onChange: setFormat },\n    { items: ALIGNS, value: align, onChange: setAlign },\n  ]}\n/>`,
   },
 
   /* ── 날짜 ── */
@@ -454,5 +470,38 @@ function HeartRatingDemo({ input, rating, color, size, showValue }: { input: boo
       <HeartRating rating={rating} color={color} size={size} showValue={showValue} />
       <HeartRating rating={rating - 0.7} color={color} size={size} showValue={showValue} />
     </div>
+  );
+}
+
+function SegmentedDemo({ withAlign }: { withAlign: boolean }) {
+  const [format, setFormat] = useState("cover");
+  const [align, setAlign] = useState("left");
+  return (
+    <Segmented
+      groups={[
+        {
+          items: [
+            { value: "cover", label: "표지" },
+            { value: "line", label: "한 줄" },
+            { value: "text", label: "글자" },
+          ],
+          value: format,
+          onChange: setFormat,
+        },
+        ...(withAlign
+          ? [
+              {
+                items: [
+                  { value: "left", icon: AlignLeft, title: "왼쪽 정렬" },
+                  { value: "center", icon: AlignCenter, title: "가운데 정렬" },
+                  { value: "right", icon: AlignRight, title: "오른쪽 정렬" },
+                ],
+                value: align,
+                onChange: setAlign,
+              },
+            ]
+          : []),
+      ]}
+    />
   );
 }

@@ -87,6 +87,8 @@ configure({
 
 ## 주의할 점
 
+- **토큰을 `--container-max`처럼 짓지 않는다.** Tailwind v4는 `--container-*`를 `w-`/`max-w-` 크기로 읽어서
+  `w-max`(내용 폭)가 그 값으로 덮인다. 그래서 페이지 폭은 `--page-max`다 — 일기에서 가져올 때 이름을 바꿔야 한다.
 - **일기와 CSS 규칙 69개가 겹친다.** 일기가 이 패키지를 쓰기 시작할 때, 패키지가 가져간 규칙
   (`.glass` · `.liquid-glass` · `.nav-aura-pill` · `.icon-*` · 임베드 카드)을 일기의
   `utilities.css`/`animations.css`/`editor.css`에서 **지워야 한다**. 안 지우면 내용이 같아

@@ -799,7 +799,7 @@
   border: 0;
 }
 
-/* ══ 링크 임베드 (09.14 채택) — 마크업 원본은 shared/lib/embed-markup.ts ══
+/* ══ 링크 임베드 — 마크업 원본은 lib/embed-markup.ts ══
  * 표지 카드(낮게) · CD 카드 · 본문 한 줄. 에디터·발행 HTML·옛 글 갈아끼우기가 같은 클래스를 쓴다.
  * --m1: 썸네일 대표색 "r,g,b" (작성 시 박제). 글자에 쓸 땐 잉크와 섞어 명도를 눌러 읽히게 한다.
  * 정적 HTML이라 움직임은 전부 :hover. 판·CD 은빛은 재질이라 테마와 무관하게 고정. */
@@ -917,7 +917,7 @@
 .embed-cover-body {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 5px;
   min-width: 0;
   max-width: 320px;
 }
@@ -930,10 +930,11 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* 저자와 출처 뱃지 사이는 가운뎃점 대신 넉넉한 틈 — 뱃지 바탕이 구분을 맡는다 */
 .embed-cover-meta {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   min-width: 0;
   font-size: 11.5px;
   line-height: 1.4;
@@ -944,14 +945,69 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.embed-cover-dot {
-  color: var(--color-ink-5);
-}
+/* 출처 뱃지 — 앞에 링크 고리 + 사이트 이름. 「눌러서 나가는 링크」 신호
+ * 라운드는 작게(4px), 높이를 못박고 가운데 맞춤 (패딩으로 높이를 만들면 옆 저자 글자와 기준선이 어긋난다).
+ * 고리는 저장 HTML이라 lucide 컴포넌트를 못 넣어서, lucide `Link2`와 같은 선을 마스크로 칠한다(색은 currentColor) */
 .embed-cover-site {
+  display: inline-flex;
   flex-shrink: 0;
-  font-size: 11px;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 4px;
+  font-size: 9.5px;
   font-weight: 600;
+  line-height: 1;
   color: var(--embed-ink);
+  background: color-mix(in srgb, rgb(var(--m1)) 16%, transparent);
+  transition: background-color 0.2s;
+}
+.embed-cover-site::before {
+  content: "";
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  background: currentColor;
+  -webkit-mask: var(--embed-link-icon) center / contain no-repeat;
+  mask: var(--embed-link-icon) center / contain no-repeat;
+}
+.embed-cover,
+.embed-cd {
+  /* lucide Link2 (stroke 2.4) */
+  --embed-link-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 17H7A5 5 0 0 1 7 7h2'/%3E%3Cpath d='M15 7h2a5 5 0 1 1 0 10h-2'/%3E%3Cline x1='8' x2='16' y1='12' y2='12'/%3E%3C/svg%3E");
+}
+:is(.embed-cover, .embed-cd):hover .embed-cover-site {
+  background: color-mix(in srgb, rgb(var(--m1)) 26%, transparent);
+}
+/* 가운데 정렬 — 글 쓸 때 고른 줄 카드만 (기본은 왼쪽) */
+:is(.embed-cover, .embed-cd)[data-align="center"] {
+  margin-left: auto;
+  margin-right: auto;
+  /* 가운데면 세로로 쌓는다 — 표지 위, 글 아래 가운데. 표지는 한 치수 커진다 */
+  flex-direction: column;
+  gap: 10px;
+  text-align: center;
+}
+:is(.embed-cover, .embed-cd)[data-align="center"] .embed-cover-body {
+  align-items: center;
+  max-width: 300px;
+}
+/* 가운데로 모이면 제목이 제 글자 폭만큼 늘어나 말줄임이 안 걸린다 — 폭을 직접 묶는다 */
+:is(.embed-cover, .embed-cd)[data-align="center"] .embed-cover-title {
+  max-width: 300px;
+}
+:is(.embed-cover, .embed-cd)[data-align="center"] .embed-cover-meta {
+  justify-content: center;
+}
+.embed-cover[data-align="center"] .embed-cover-img {
+  width: 132px;
+}
+.embed-cover[data-align="center"][data-kind="book"] .embed-cover-img {
+  width: 68px;
+}
+.embed-cover[data-align="center"][data-kind="video"] .embed-cover-img {
+  width: 140px;
 }
 
 /* ── CD 카드 (음악) — 케이스 뒤로 은빛 CD가 반쯤 나와 있고, 호버하면 빠져나와 계속 돈다 ── */

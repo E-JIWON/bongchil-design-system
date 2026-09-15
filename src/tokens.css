@@ -68,8 +68,10 @@
   --radius-m: 10px;
   --radius-l: 16px;
 
-  /* Layout — 중앙 정렬 리딩 컬럼 최대 폭 (단일 진실 소스) */
-  --container-max: 1024px;
+  /* Layout — 중앙 정렬 리딩 컬럼 최대 폭 (단일 진실 소스).
+     ⚠️ `--container-max`로 지으면 안 된다 — Tailwind가 `--container-*`를 w-/max-w- 크기로 읽어서
+     `w-max`(내용 폭)가 1024px로 덮인다. 키워드(max·min·fit·full·auto)와 겹치는 이름 금지 */
+  --page-max: 1024px;
 
   /* Desk — 카드 프레임 바깥 책상 배경 */
   --color-desk: #EAE7DF;

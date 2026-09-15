@@ -22,6 +22,8 @@ export type EmbedCardData = {
   tint: string;
   author: string;
   site: string;
+  /** 줄 카드 정렬 — 글 쓸 때 고른다. 없으면 왼쪽 (본문 한 줄은 글줄 안이라 안 쓴다) */
+  align?: "left" | "center";
 };
 
 /** 저장 HTML에 박제하는 속성 — 다시 불러올 때(parseHTML) 그대로 복원한다 */
@@ -34,6 +36,7 @@ function dataAttrs(d: EmbedCardData): Record<string, string> {
     "data-tint": d.tint,
     "data-author": d.author,
     "data-site": d.site,
+    ...(d.align === "center" ? { "data-align": "center" } : {}),
   };
 }
 
@@ -58,7 +61,8 @@ const titleOf = (d: EmbedCardData) => {
 /** 제목 아래 한 줄 — 저자 · 출처 */
 function bodySpec(d: EmbedCardData): EmbedSpec {
   const meta: EmbedSpec = ["span", { class: "embed-cover-meta" }];
-  if (d.author) meta.push(["span", { class: "embed-cover-author" }, d.author], ["span", { class: "embed-cover-dot", "aria-hidden": "true" }, "·"]);
+  // 저자와 출처 뱃지 사이 가운뎃점은 뺐다 — 뱃지 바탕과 틈이 구분을 맡는다
+  if (d.author) meta.push(["span", { class: "embed-cover-author" }, d.author]);
   meta.push(["span", { class: "embed-cover-site" }, siteLabel(d.src, d.site)]);
   return ["span", { class: "embed-cover-body" }, ["span", { class: "embed-cover-title" }, titleOf(d)], meta];
 }
@@ -126,6 +130,7 @@ export function readEmbedData(el: HTMLElement): EmbedCardData {
     tint: a("data-tint"),
     author: a("data-author"),
     site: a("data-site"),
+    align: a("data-align") === "center" ? "center" : "left",
   };
 }
 
