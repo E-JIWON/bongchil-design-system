@@ -1,0 +1,1 @@
+export { CoverFrame } from "./CoverFrame";

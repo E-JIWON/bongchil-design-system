@@ -1,0 +1,37 @@
+{
+  "name": "bongchil-design-system",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "files": [
+    "src"
+  ],
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.css": "./src/tokens.css",
+    "./components.css": "./src/components.css"
+  },
+  "peerDependencies": {
+    "lucide-react": ">=0.5",
+    "react": ">=19",
+    "react-dom": ">=19"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "lucide-react": "^0.577.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "typescript": "^5.9.3"
+  },
+  "description": "봉칠 디자인 시스템 — 토큰·재질·컨트롤 컴포넌트",
+  "scripts": {
+    "dev": "pnpm --filter bongchil-design-system-demo dev",
+    "typecheck": "tsc --noEmit",
+    "check": "tsc --noEmit && node scripts/check-css.mjs"
+  }
+}

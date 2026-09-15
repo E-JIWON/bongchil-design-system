@@ -1,0 +1,38 @@
+/* Pretendard — 패키지는 폰트를 싣지 않는다. 토큰이 참조하는 --font-pretendard를 앱이 채운다.
+   (일기 앱은 next/font/local, 여기선 동적 서브셋 CDN) */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css");
+
+@import "tailwindcss";
+@import "bongchil-design-system/tokens.css";
+@import "bongchil-design-system/components.css";
+
+/* ⚠️ Tailwind v4는 패키지 소스를 스캔하지 않는다 — 이 줄이 빠지면 스타일이 통째로 사라진다 */
+@source "../../src";
+
+:root {
+  --font-pretendard: "Pretendard Variable";
+  --font-spoqa: "Pretendard Variable";
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--desk-bg);
+  background-attachment: fixed;
+  color: var(--color-ink);
+  font-family: var(--font-family-serif);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus,
+:focus-visible {
+  outline: none;
+}

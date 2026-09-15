@@ -1,0 +1,1 @@
+export { RecommendationIcon } from "./RecommendationIcon";
