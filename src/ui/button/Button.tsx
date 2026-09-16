@@ -155,8 +155,9 @@ export function Button({
   );
 
   // 유리 표면은 아이콘 하나만 담는다 — 라벨이 필요하면 text·grain으로 (개발 중에만 경고)
-  // `typeof process` 가드 — Next는 치환해주지만 브라우저 번들러 설정에 따라 process가 없을 수 있다
-  if (typeof process !== "undefined" && process.env.NODE_ENV !== "production" && variant === "glass" && !iconOnly && children) {
+  // Node 타입 없이도 쓰이는 패키지라 process 를 전역에서 더듬어 꺼낸다 (없으면 그냥 개발로 친다)
+  const nodeEnv = (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process?.env?.NODE_ENV;
+  if (nodeEnv !== "production" && variant === "glass" && !iconOnly && children) {
     console.warn("[Button] glass 재질에 텍스트 라벨을 넣지 마세요. variant='text'|'grain'을 쓰거나, 라벨을 지우고 IconButton으로 바꾸세요.", children);
   }
 
