@@ -33,7 +33,14 @@ type ConfirmOptions = {
 type CustomOptions = {
   children: ReactNode;
   showClose?: boolean;
+  /**
+   * 카드 폭 — 기본 `sm`(270px)은 알림·확인용 좁은 폭이다.
+   * 캡처·표처럼 읽을 게 있으면 `md`(480) · `lg`(720)로 넓힌다.
+   */
+  size?: "sm" | "md" | "lg";
 };
+
+const CUSTOM_WIDTH = { sm: "max-w-[270px]", md: "max-w-[min(480px,92vw)]", lg: "max-w-[min(720px,92vw)]" } as const;
 
 type ModalAPI = {
   alert: (options: AlertOptions) => Promise<void>;
@@ -174,7 +181,7 @@ export function ModalProvider({
             {state.type === "custom" ? (
               /* ── Custom ── */
               <div
-                className={`modal-glass relative w-full max-w-[270px] overflow-hidden rounded-[14px] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                className={`modal-glass relative w-full ${CUSTOM_WIDTH[state.options.size ?? "sm"]} overflow-hidden rounded-[14px] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                   cardVisible
                     ? "translate-y-0 scale-100 opacity-100"
                     : "translate-y-6 opacity-0 sm:translate-y-0 sm:scale-[0.92]"
