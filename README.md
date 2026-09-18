@@ -87,6 +87,8 @@ configure({
 
 ## 주의할 점
 
+- **모서리 토큰은 `rounded-[var(--radius-l)]` 로 쓴다.** `rounded-l` 은 Tailwind에서 **왼쪽 면**,
+  `rounded-s` 는 **시작 면**이라 이름이 겹친다 (`rounded-m` 만 안 겹침). 겹친 이름으로 쓰면 한쪽 모서리만 둥글어진다.
 - **토큰을 `--container-max`처럼 짓지 않는다.** Tailwind v4는 `--container-*`를 `w-`/`max-w-` 크기로 읽어서
   `w-max`(내용 폭)가 그 값으로 덮인다. 그래서 페이지 폭은 `--page-max`다 — 일기에서 가져올 때 이름을 바꿔야 한다.
 - **일기와 CSS 규칙 69개가 겹친다.** 일기가 이 패키지를 쓰기 시작할 때, 패키지가 가져간 규칙

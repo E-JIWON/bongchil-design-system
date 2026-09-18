@@ -43,6 +43,12 @@ for (const m of tokens.matchAll(/--(container|width|spacing)-(max|min|fit|full|a
   fail(`src/tokens.css: --${m[1]}-${m[2]} 가 Tailwind 키워드 유틸(w-${m[2]} 등)을 덮는다`);
 }
 
+// 면(side) 약자와 겹치는 토큰 이름 — `rounded-l` 은 "왼쪽 면", `rounded-s` 는 "시작 면"이라
+// --radius-l 을 만들어도 rounded-l 로는 못 쓴다. 쓰려면 rounded-[var(--radius-l)] 로 지목해야 한다.
+for (const m of tokens.matchAll(/--radius-(s|e|l|r|t|b|x|y)\s*:/g)) {
+  console.warn(`  · src/tokens.css: --radius-${m[1]} 은 Tailwind 면 유틸(rounded-${m[1]})과 이름이 겹친다 — 호출부는 rounded-[var(--radius-${m[1]})] 로 쓸 것`);
+}
+
 // 컴포넌트도 데모도 안 쓰는 embed 규칙
 const components = readFileSync("src/components.css", "utf8");
 const code = ["src/ui", "src/lib", "demo/src"]
