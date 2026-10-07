@@ -1,7 +1,7 @@
 # bongchil-design-system
 
 봉칠 디자인 시스템 — 토큰 · 재질 · 컨트롤 컴포넌트.
-[bongchil-diary](https://github.com/E-JIWON/bongchil-diary)의 `shared/ui`에서 뽑아냈다.
+개인 블로그 앱의 `shared/ui`에서 뽑아냈다.
 
 **카탈로그** → https://bongchil-design-system.vercel.app (`#스토리id`로 바로 열린다)
 
@@ -93,8 +93,8 @@ configure({
 **아직 안 가져온 것** — `PageHeader` · `StoryNav` · `Lightbox` · `PlaceBadge` · `GuestStamp`
 (링크 · 인증 · 이미지를 주입으로 끊는 작업이 남음).
 
-**일기에 둔 것** — `FieldGroup` · `PostHeader` · `AsideColumn` · `SubTitle` · `FadeDivider` ·
-`DraftResumeCard` · `Quote` · `CountAccent`. 일기 화면에서만 뜻이 통한다.
+**원래 앱에 둔 것** — `FieldGroup` · `PostHeader` · `AsideColumn` · `SubTitle` · `FadeDivider` ·
+`DraftResumeCard` · `Quote` · `CountAccent`. 그 앱 화면에서만 뜻이 통한다.
 
 **안 가져올 것** — 라우트를 하드코딩한 탭 훅, 서버 프록시가 필요한 링크 미리보기 조회, 앱 부팅 코드.
 라우팅 · 데이터 조회 · 부팅은 앱 몫이다.
@@ -160,10 +160,3 @@ cd demo && pnpm build   # 카탈로그 (타입체크 + 번들)
 1. `pnpm check` 통과시키고 커밋
 2. 태그를 찍는다 — `git tag v0.1.3 && git push origin v0.1.3`
 3. 소비 앱에서 `package.json`의 태그를 올리고 설치 → 화면 확인 후 커밋
-
-## 쓰는 곳
-
-| 앱 | 쓰는 방식 |
-| --- | --- |
-| [bongchil-diary](https://github.com/E-JIWON/bongchil-diary) | 공통 컴포넌트를 한 번에 하나씩 이 패키지로 옮기는 중 (옮긴 것은 `/component`에서 본다) |
-| 웹 이력서 | 토큰 · 버튼 · 세그먼트 · 모달 사용 |
