@@ -1,6 +1,6 @@
 {
   "name": "bongchil-design-system",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "private": false,
   "type": "module",
   "sideEffects": [
@@ -33,5 +33,10 @@
     "dev": "pnpm --filter bongchil-design-system-demo dev",
     "typecheck": "tsc --noEmit",
     "check": "tsc --noEmit && node scripts/check-css.mjs"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/E-JIWON/bongchil-design-system"
+  },
+  "homepage": "https://bongchil-design-system.vercel.app"
 }
