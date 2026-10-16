@@ -26,6 +26,7 @@ pnpm add "bongchil-design-system@file:../bongchil-design-system"
 
 | 태그 | 내용 |
 | --- | --- |
+| `v0.1.3` | 가계부 앱 아이콘 15종·이모지 매핑 추가, `FieldGroup`·`SearchField`·`Input` 이관 |
 | `v0.1.2` | 모달 자유 내용에 `size` 추가 (sm 270 · md 480 · lg 720) |
 | `v0.1.1` | `Button`이 `@types/node` 없이도 타입체크되게 |
 | `v0.1.0` | 첫 공개 |
@@ -78,6 +79,7 @@ configure({
 | 컨트롤 | `Button`(+grain) · `IconButton` · `Toggle` · `TodoCheckbox` · `Segmented` · `FilterChips` · `HeartRating` |
 | 날짜 | `DatePicker`/`DatePickerCalendar` · `MonthPicker` · `DateRangeText` |
 | 카테고리 | `CategoryChip` · `CategoryPill` · `CategoryMark` · `CategorySelect` · `CategoryIcon` |
+| 입력 | `FieldGroup`/`FieldDivider`/`fieldInputClass` · `SearchField` · `Input`(default · inline · ghost) |
 | 레이아웃 | `NavTabs` · `PageTitle` · `PageContainer` |
 | 카드 · 종이 | `PostItCard` · `CoverFrame` · `NoticeArea` |
 | 피드백 | `ToastProvider`/`useToast` · `EmptyState` · `Skeleton` · `Tooltip` |
