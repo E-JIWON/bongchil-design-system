@@ -1446,3 +1446,42 @@
 .postit-ink {
   color: #3a3833;
 }
+
+/* ══ 시트 · 창 (Sheet) — 브라우저 <dialog> ══
+   좁은 화면은 아래 시트, 1000px부터(또는 data-center) 가운데 창. 닫을 때 data-leaving으로 나가는 움직임.
+   components 레이어라 부르는 쪽 유틸(p-0, w-…)이 이긴다 */
+@layer components {
+  dialog.sheet { box-sizing: border-box; width: 100%; max-width: 100%; max-height: calc(100dvh - 56px); margin: auto 0 0; padding: 8px 16px calc(24px + env(safe-area-inset-bottom, 0px)); border: 0; border-radius: 8px 8px 0 0; background: var(--color-surface); color: var(--color-ink); box-shadow: 0 -16px 48px rgb(20 18 16 / 0.18); overflow-y: auto; overscroll-behavior: contain; }
+  dialog.sheet::backdrop { background: rgb(20 18 16 / 0.38); }
+  dialog.sheet[open] { animation: sheet-up 0.32s cubic-bezier(0.32, 0.72, 0, 1); }
+  dialog.sheet[data-leaving] { animation: sheet-down 0.18s cubic-bezier(0.4, 0, 1, 1) forwards; }
+  dialog.sheet[data-leaving]::backdrop { animation: sheet-fade 0.18s ease forwards; }
+  .sheet-grab { width: 36px; height: 4px; margin: 0 auto 12px; border-radius: 2px; background: rgb(20 18 16 / 0.18); }
+  .sheet-head { display: flex; align-items: center; gap: 8px; padding: 0 2px; }
+  .sheet-title { flex: 1; min-width: 0; margin: 0; font-size: 15px; font-weight: 700; color: var(--color-ink-3); }
+  .sheet-x { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border: 0; border-radius: 8px; background: none; color: var(--color-ink-3); cursor: pointer; transition: background-color 0.15s, color 0.15s; }
+  .sheet-x:hover { background: color-mix(in oklab, var(--color-ink) 5%, transparent); color: var(--color-ink); }
+
+  /* 가운데 창 — 넓은 화면 또는 data-center */
+  dialog.sheet[data-center] { margin: auto; width: 440px; max-width: calc(100% - 32px); max-height: 85dvh; padding: 20px 24px 24px; border-radius: 8px; box-shadow: 0 24px 64px rgb(20 18 16 / 0.24); }
+  dialog.sheet[data-center][data-wide] { width: 760px; padding: 24px 28px 28px; }
+  dialog.sheet[data-center] .sheet-grab { display: none; }
+  dialog.sheet[data-center][open] { animation: sheet-pop 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
+  dialog.sheet[data-center][data-leaving] { animation: sheet-pop-out 0.18s cubic-bezier(0.4, 0, 1, 1) forwards; }
+  @media (min-width: 1000px) {
+    dialog.sheet { margin: auto; width: 440px; max-width: calc(100% - 32px); max-height: 85dvh; padding: 20px 24px 24px; border-radius: 8px; box-shadow: 0 24px 64px rgb(20 18 16 / 0.24); }
+    dialog.sheet[data-wide] { width: 760px; padding: 24px 28px 28px; }
+    dialog.sheet .sheet-grab { display: none; }
+    dialog.sheet[open] { animation: sheet-pop 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
+    dialog.sheet[data-leaving] { animation: sheet-pop-out 0.18s cubic-bezier(0.4, 0, 1, 1) forwards; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    dialog.sheet[open], dialog.sheet[data-leaving], dialog.sheet[data-leaving]::backdrop { animation: none; }
+  }
+  html:has(dialog.sheet[open]) { overflow: hidden; }
+}
+@keyframes sheet-up { from { transform: translateY(100%); } }
+@keyframes sheet-down { to { transform: translateY(100%); } }
+@keyframes sheet-pop { from { opacity: 0; transform: scale(0.97); } }
+@keyframes sheet-pop-out { to { opacity: 0; transform: scale(0.97); } }
+@keyframes sheet-fade { to { opacity: 0; } }

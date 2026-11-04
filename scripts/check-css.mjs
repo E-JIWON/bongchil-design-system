@@ -4,7 +4,7 @@
  */
 import { readFileSync, readdirSync, statSync } from "node:fs";
 
-const FILES = ["src/tokens.css", "src/components.css"];
+const FILES = ["src/tokens.css", "src/components.css", "src/crayon.css"];
 let failed = false;
 
 function fail(msg) {

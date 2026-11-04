@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { NumberRoll, Sheet, TextScramble } from "bongchil-design-system";
 import { AlignCenter, AlignLeft, AlignRight, Inbox, LayoutGrid, Sparkles, StickyNote } from "lucide-react";
 import {
   BottomSheet,
@@ -324,6 +325,47 @@ export const MORE_STORIES: Story[] = [
     wide: true,
     render: () => <GuestColorsDemo />,
   },
+  {
+    id: "number-roll",
+    group: "모션",
+    name: "NumberRoll (숫자 굴림)",
+    fresh: true,
+    notes: [
+      "값이 바뀔 때만 바뀐 자리가 굴러감 — 처음엔 그냥 숫자",
+      "자리는 일의 자리부터 맞춤: 999 → 1,000처럼 자릿수 · 쉼표가 바뀌어도 같은 자리끼리, 새 앞자리는 0에서 굴러 들어옴",
+      "format으로 통화 · 단위 (숫자 아닌 글자는 그대로). 읽기 · 복사는 숨은 진짜 숫자",
+    ],
+    render: () => <RollDemo />,
+    code: () => `<NumberRoll value={total} />\n<NumberRoll value={won} format={(v) => \`\${v.toLocaleString()}원\`} />`,
+  },
+  {
+    id: "text-scramble",
+    group: "모션",
+    name: "TextScramble (글자 섞임)",
+    fresh: true,
+    notes: ["붙을 때 글자가 섞였다가 왼쪽부터 제자리로 — 바뀐 줄을 다시 그릴 때 key로", "가짜 글자는 45ms마다 — 번쩍임 대신 풀리는 느낌", "숫자는 숫자로, 한글은 한글로 섞여 폭이 덜 흔들림"],
+    render: () => <ScrambleDemo />,
+    code: () => `<TextScramble key={row.id}>{row.title}</TextScramble>`,
+  },
+  {
+    id: "sheet",
+    group: "표면",
+    name: "Sheet (시트 · 창)",
+    fresh: true,
+    notes: [
+      "브라우저 <dialog> — 포커스 가두기 · Esc · 뒤 화면 막기가 그냥 됨",
+      "좁은 화면은 아래 시트, 1000px부터 가운데 창. center면 늘 가운데",
+      "닫을 때도 움직이고 나서 onClose. 바깥을 누르면 닫힘 (창 여백은 안 닫힘)",
+      "title을 주면 머리 줄(뒤로 · 제목 · 닫기), 안 주면 내용만 — 여백은 className으로",
+    ],
+    controls: [
+      { key: "center", type: "bool" },
+      { key: "wide", type: "bool" },
+    ],
+    initial: { center: false, wide: false },
+    render: (p) => <SheetDemo center={Boolean(p.center)} wide={Boolean(p.wide)} />,
+    code: (p) => `<Sheet open={open} onClose={() => setOpen(false)} title="오늘 상태 2/6" labelledBy="q"${p.center ? " center" : ""}${p.wide ? " wide" : ""}>\n  <h3 id="q">몸은 어때요?</h3>\n</Sheet>`,
+  },
 ];
 
 /* ── 상태가 필요한 데모 ── */
@@ -503,5 +545,51 @@ function SegmentedDemo({ withAlign }: { withAlign: boolean }) {
           : []),
       ]}
     />
+  );
+}
+
+function RollDemo() {
+  const [v, setV] = useState(987);
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <span className="text-[28px] font-bold text-ink-2">
+        <NumberRoll value={v} format={(n) => `${n.toLocaleString()}원`} />
+      </span>
+      <div className="flex gap-1.5">
+        <Button variant="grain" size="xs" onClick={() => setV((x) => x + 13)}>+13</Button>
+        <Button variant="grain" size="xs" onClick={() => setV((x) => x + 1000)}>+1,000</Button>
+        <Button variant="grain" size="xs" onClick={() => setV((x) => Math.max(0, x - 1000))}>−1,000</Button>
+      </div>
+    </div>
+  );
+}
+
+const SCRAMBLE = ["점심 김밥 4,500원", "Coffee 3,800", "택시 12,300원"];
+function ScrambleDemo() {
+  const [i, setI] = useState(0);
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <span className="text-[17px] font-bold text-ink-2">
+        <TextScramble key={i}>{SCRAMBLE[i % SCRAMBLE.length]}</TextScramble>
+      </span>
+      <Button variant="grain" size="xs" onClick={() => setI((x) => x + 1)}>다음 줄</Button>
+    </div>
+  );
+}
+
+function SheetDemo({ center, wide }: { center: boolean; wide: boolean }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button variant="grain" size="sm" onClick={() => setOpen(true)}>시트 열기</Button>
+      <Sheet open={open} onClose={() => setOpen(false)} title="오늘 상태 2/6" labelledBy="sheet-demo-q" center={center} wide={wide}>
+        <h3 id="sheet-demo-q" className="mt-3 text-[22px] font-extrabold tracking-tight text-ink">몸은 어때요?</h3>
+        <p className="mt-1.5 text-[13px] text-ink-3">Esc, 바깥 누르기, 닫기 버튼 — 셋 다 나가는 움직임 뒤에 닫혀요.</p>
+        <div className="mt-5 flex gap-2">
+          <Button variant="grain" size="sm" onClick={() => setOpen(false)}>나중에</Button>
+          <Button variant="grain" size="sm" active onClick={() => setOpen(false)}>좋아요</Button>
+        </div>
+      </Sheet>
+    </>
   );
 }

@@ -5,6 +5,7 @@
 @import "tailwindcss";
 @import "bongchil-design-system/tokens.css";
 @import "bongchil-design-system/components.css";
+@import "bongchil-design-system/crayon.css";
 
 /* ⚠️ Tailwind v4는 패키지 소스를 스캔하지 않는다 — 이 줄이 빠지면 스타일이 통째로 사라진다 */
 @source "../../src";

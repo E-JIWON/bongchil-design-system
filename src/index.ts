@@ -86,6 +86,8 @@ export type { Config } from "./config";
 
 // ── 추가 공용 (2차 추출) ──
 export * from "./ui/bottom-sheet";
+export * from "./ui/sheet";
+export * from "./ui/rolling-text";
 export * from "./ui/cover-frame";
 export * from "./ui/date-range-text";
 export * from "./ui/dock-popover";

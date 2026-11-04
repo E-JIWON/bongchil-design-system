@@ -1,0 +1,76 @@
+/* ===== 크레용 타입 — 크레파스 결 =====
+   기존 components.css와 따로 불러온다. 클래스는 전부 crayon- 로 시작.
+   필터는 <CrayonDefs />가 깐다. 색은 --crayon 하나, 안 주면 --color-primary.
+   밝힐 때 white 대신 --color-surface와 섞어서 다크에서도 칠이 튀지 않게 한다. */
+
+/* 가장자리 흔들림만 — 작은 칸, 점, 체크 */
+.crayon-edge{filter:url(#crayon)}
+
+/* 칠한 면: 색을 조금 밝혀 결 무늬를 넣고 #pastel(울퉁불퉁 가장자리 + 종이 요철) */
+.crayon-fill{background-color:color-mix(in oklab,var(--crayon,var(--color-primary)) 90%,var(--color-surface));background-image:repeating-linear-gradient(-7deg,transparent 0 2px,rgb(255 255 255 / .18) 2px 3px,transparent 3px 5px);filter:url(#pastel)}
+
+/* 안 한 쪽: 테두리 없이 굵고 성긴 빗금, #pastel-line으로 손떨림. 빗금 진하기 --crayon-todo-p (기본 56%) */
+.crayon-todo{opacity:.4;background-image:repeating-linear-gradient(-55deg,color-mix(in oklab,var(--crayon,var(--color-primary)) var(--crayon-todo-p,56%),transparent) 0 1.8px,transparent 1.8px 5.5px);filter:url(#pastel-line)}
+
+/* 크레용 바: 칠 + 빗금 + 지금 선 */
+.crayon-bar{position:relative;display:flex;gap:2px;height:8px}
+.crayon-bar>.crayon-fill{flex:none;height:100%;border-radius:2px;transition:width .24s cubic-bezier(.23,1,.32,1)}
+.crayon-bar>.crayon-todo{flex:1;height:100%;border-radius:2px}
+.crayon-bar-now{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;border-radius:1px;background:var(--color-ink)}
+
+/* 형광펜: 글자 아래 절반, 0.26초에 왼쪽부터 칠함.
+   높이 --crayon-wash-h (기본 55%), 진하기 --crayon-wash-p (기본 60%). 늘 칠해져 있는 제목·강조는 -still로 움직임 없이 */
+.crayon-wash{position:relative;isolation:isolate;display:inline-block}
+.crayon-wash::before{content:"";position:absolute;left:-4px;right:-4px;bottom:-1px;height:var(--crayon-wash-h,55%);z-index:-1;border-radius:3px;background-color:color-mix(in oklab,var(--crayon,var(--color-primary)) var(--crayon-wash-p,60%),var(--color-surface));filter:url(#pastel);animation:crayon-wash .26s cubic-bezier(.23,1,.32,1) both}
+.crayon-wash-still::before{animation:none}
+@keyframes crayon-wash{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+
+/* 연필 선: 가는 잉크 선에 종이 결 (#graphite). 높이로 굵기 */
+.crayon-line{display:block;height:2px;border-radius:1px;background:color-mix(in oklab,var(--color-ink) 45%,transparent);filter:url(#graphite)}
+
+/* 손그림 동그라미 바탕: 어떤 요소든 뒤에 찌그러진 동그라미를 칠함 (고른 날, 고른 칸, 고른 값).
+   진하기 --crayon-blob-p (기본 32%), 안쪽 여백 --crayon-blob-inset (기본 0). 숨겼다 보이는 움직임은 부르는 쪽 ::before에 */
+.crayon-blob{position:relative;isolation:isolate}
+.crayon-blob::before{content:"";position:absolute;inset:var(--crayon-blob-inset,0);z-index:-1;border-radius:46% 54% 42% 58%/58% 44% 56% 42%;background-color:color-mix(in oklab,var(--crayon,var(--color-primary)) var(--crayon-blob-p,32%),var(--color-surface));filter:url(#pastel)}
+/* 손그림 동그라미 (CrayonCircle): blob에 글자 가운데 맞춤. -ring은 칠 없이 크레용 테두리만 */
+.crayon-circle{display:inline-grid;place-items:center;min-width:28px;min-height:28px}
+.crayon-circle-ring::before{background:none;box-shadow:inset 0 0 0 2px var(--crayon,var(--color-primary));filter:url(#crayon)}
+
+/* 손그림 칸 · 기둥 · 펜 획 (sketch.tsx) */
+.crayon-check{flex:none;overflow:visible}
+/* 기둥 줄 — 키 큰 칠은 #pastel이 모래알처럼 구멍 나서 #pastel-block */
+.crayon-columns{display:flex;width:100%;align-items:flex-end;gap:3px}
+.crayon-columns>span{flex:1;border-radius:1px}
+.crayon-columns>.crayon-columns-zero{flex:1;height:2px;border-radius:999px;background:var(--color-border-strong,currentColor);opacity:.6}
+.crayon-fill.crayon-block{filter:url(#pastel-block)}
+/* 펜 획: 처음 생길 때 그어짐 (pathLength=1). 체크 칸은 켤 때 빗금 · 체크가 이걸로 그어짐 */
+.crayon-frame{pointer-events:none;position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.crayon-pen{pointer-events:none;position:absolute;overflow:visible}
+.crayon-draw{stroke-dasharray:1;animation:crayon-draw .32s ease-out backwards}
+.crayon-draw-slow{animation-duration:.46s;animation-timing-function:cubic-bezier(.55,0,.25,1)}
+@keyframes crayon-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+
+/* 고른 칸 (pick.tsx): 그 색을 옅게 칠한 크레파스 면을 뒤에 깐다 — 메뉴 · 세로 탭이 같은 면 */
+.crayon-pick{position:relative;isolation:isolate}
+.crayon-pick::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background-color:color-mix(in oklab,color-mix(in oklab,var(--crayon,var(--color-primary)) 15%,transparent) 90%,var(--color-surface));background-image:repeating-linear-gradient(-7deg,transparent 0 2px,rgb(255 255 255 / .18) 2px 3px,transparent 3px 5px);filter:url(#pastel)}
+/* 메뉴 한 줄: 아이콘 · 이름. 지금 있는 곳은 진한 글자 + 아이콘만 그 색 */
+.crayon-nav-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--radius-m);font-size:13px;color:var(--color-ink-3);text-decoration:none;transition:color .15s}
+.crayon-nav-item:hover{color:var(--color-ink)}
+.crayon-nav-item>svg{flex:none;width:14px;height:14px;color:var(--color-ink-4);stroke-width:1.7}
+.crayon-nav-item[aria-current]{font-weight:600;color:var(--color-ink)}
+.crayon-nav-item[aria-current]>svg{color:var(--crayon,var(--color-primary));stroke-width:2}
+/* 세로 탭: 칩 · 이름 · 개수 / 한 줄 값 / 크레용 막대 */
+.crayon-side{display:flex;flex-direction:column;gap:4px}
+.crayon-side-tab{display:block;width:100%;padding:12px;border:0;border-radius:var(--radius-m);background:none;font:inherit;color:inherit;text-align:left;cursor:pointer;transition:background-color .15s}
+.crayon-side-tab:not(.crayon-pick):hover{background-color:color-mix(in oklab,var(--color-ink) 3%,transparent)}
+.crayon-side-tab:focus-visible{outline:2px solid color-mix(in oklab,var(--crayon,var(--color-primary)) 50%,transparent);outline-offset:1px}
+.crayon-side-head{display:flex;align-items:center;gap:8px}
+.crayon-side-chip{flex:none;width:10px;height:10px;border-radius:2px}
+.crayon-side-label{font-size:14px;color:var(--color-ink-2)}
+.crayon-pick .crayon-side-label{font-weight:600;color:var(--color-ink)}
+.crayon-side-count{margin-left:auto;font-size:12px;font-variant-numeric:tabular-nums;color:var(--color-ink-4)}
+.crayon-side-sub{display:block;margin-top:4px;padding-left:18px;font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--color-ink-3)}
+.crayon-side-bar{display:block;height:4px;margin:8px 0 0 18px}
+.crayon-side-bar>.crayon-fill{display:block;height:100%;border-radius:1px}
+
+@media (prefers-reduced-motion:reduce){.crayon-wash::before{animation:none}.crayon-bar>.crayon-fill{transition:none}.crayon-draw{animation:none}}

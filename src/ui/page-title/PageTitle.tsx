@@ -23,7 +23,8 @@ export function PageTitle({
   return (
     // min-h는 표준 컨트롤 한 줄 높이(34px) — 액션(월 네비·뷰 전환)이 있든 없든 행 높이가 같아야
     // 페이지를 오갈 때 제목 글자가 위아래로 안 흔들린다. 제목만 있으면 27.5px라 3px씩 튀었다.
-    <div className={`flex min-h-[34px] flex-wrap items-center gap-x-3 gap-y-2 ${className}`}>
+    // data-page-head — 앱이 화면 전환 움직임에서 제목 줄만 빼고 싶을 때 고를 수 있게
+    <div data-page-head className={`flex min-h-[34px] flex-wrap items-center gap-x-3 gap-y-2 ${className}`}>
       {/* 제목·소제목은 베이스라인으로 묶고, 액션은 바깥 행에서 세로 중앙 정렬 */}
       <div className="flex items-baseline gap-2.5">
         <h1 className="shrink-0 text-xl font-bold leading-snug tracking-tight text-ink-2 max-sm:text-lg">

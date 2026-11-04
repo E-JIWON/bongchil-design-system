@@ -1,6 +1,6 @@
 {
   "name": "bongchil-design-system",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "private": false,
   "type": "module",
   "sideEffects": [
@@ -12,7 +12,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./tokens.css": "./src/tokens.css",
-    "./components.css": "./src/components.css"
+    "./components.css": "./src/components.css",
+    "./crayon": "./src/crayon/index.ts",
+    "./crayon.css": "./src/crayon.css"
   },
   "peerDependencies": {
     "lucide-react": ">=0.5",

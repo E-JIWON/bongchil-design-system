@@ -23,6 +23,8 @@ export type Story = {
   code?: (p: Props) => string;
   /** 미리보기를 세로로 넓게 (빈 상태·페이지 제목처럼 폭을 다 쓰는 것) */
   wide?: boolean;
+  /** 새로 들어와 검수 중 — 목록 · 제목 글자색을 다르게 */
+  fresh?: boolean;
 };
 
 /** 선택지 헬퍼 — `opts("a","b")` 또는 라벨을 따로 줄 땐 객체로 */
