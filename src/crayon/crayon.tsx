@@ -100,3 +100,18 @@ export function CrayonCircle({ children, ring, color, className, style }: { chil
     </span>
   );
 }
+
+/**
+ * 툴팁 — 아이콘만 있는 버튼에 이름표. 올리거나 포커스하면 아래(side="top"이면 위)에 옅은 크레파스 면 + 진한 글자.
+ * CSS만(상태 · 포털 없음). 감싼 요소의 title은 지울 것 — 겹치면 이름표가 둘. 면 색은 color(안 주면 잉크)
+ */
+export function CrayonTooltip({ label, side = "bottom", color, className, children }: { label: ReactNode; side?: "top" | "bottom"; color?: string; className?: string; children: ReactNode }) {
+  return (
+    <span className={["crayon-tip", className].filter(Boolean).join(" ")}>
+      {children}
+      <span role="tooltip" className="crayon-tip-label" data-side={side} style={tint(color)}>
+        {label}
+      </span>
+    </span>
+  );
+}

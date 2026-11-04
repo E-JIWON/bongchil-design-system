@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
 import { CalendarDays, Home, PiggyBank, Settings } from "lucide-react";
-import { CrayonBar, CrayonCalendar, CrayonCheck, CrayonCircle, CrayonColumns, CrayonFrame, CrayonNavItem, CrayonPen, CrayonSideTabs, CrayonSteps, CrayonWash } from "bongchil-design-system/crayon";
+import { CrayonBar, CrayonCalendar, CrayonCheck, CrayonCircle, CrayonColumns, CrayonFrame, CrayonNavItem, CrayonPen, CrayonSideTabs, CrayonSteps, CrayonTooltip, CrayonWash } from "bongchil-design-system/crayon";
 import { type Story } from "./controls";
 
 /* 크레용 타입 스토리 — 기존 스토리와 섞지 않고 네비의 "크레용" 쪽에만 뜬다 */
@@ -115,7 +115,7 @@ function NavDemo({ color }: { color?: string }) {
 function CalendarDemo({ color }: { color?: string }) {
   const [v, setV] = useState<string | null>("2026-11-12");
   return (
-    <div className="w-[220px] rounded-[10px] border border-border bg-surface p-2 shadow-[0_2px_10px_rgb(0_0_0/0.04)]">
+    <div className="crayon-paper relative w-[220px] rounded-[10px] border border-border p-2 shadow-[0_2px_10px_rgb(0_0_0/0.04)]">
       <CrayonCalendar value={v} onChange={setV} color={color} />
     </div>
   );
@@ -131,10 +131,46 @@ export const CRAYON_STORIES: Story[] = [
       "DatePickerCalendar의 크레용 짝 — 팝오버 안에 두는 패널, 위치는 부르는 쪽이 감싼다",
       "고른 날 = 옅은 크레파스 네모 면(.crayon-pick), 오늘 = 손그림 네모 테두리",
       "value(ISO) · onChange · allowDeselect · showToday · initialMonth는 DatePickerCalendar와 같다",
+      "팝오버 바탕은 .crayon-paper — 종이 결 + 옅은 노랑 크레파스 칠(색 --crayon-paper). position은 부르는 쪽이 (fixed · absolute · relative)",
     ],
     controls: [{ key: "color", type: "select", options: COLORS }],
     render: (p) => <CalendarDemo color={p.color as string | undefined} />,
-    code: (p) => `<CrayonCalendar value={date} onChange={setDate}${colorAttr(p.color)} />`,
+    code: (p) => `<div className="crayon-paper relative rounded-[10px] border border-border p-2">\n  <CrayonCalendar value={date} onChange={setDate}${colorAttr(p.color)} />\n</div>`,
+  },
+
+  {
+    id: "crayon-tooltip",
+    group: "피드백",
+    name: "CrayonTooltip (툴팁)",
+    fresh: true,
+    notes: [
+      "아이콘만 있는 버튼에 이름표 — 올리거나 포커스하면 옅은 크레파스 면 + 진한 글자",
+      "보일 땐 0.25초 기다림(아이콘 줄을 훑을 때 깜빡이지 않게), 숨길 땐 바로",
+      "CSS만 (상태 · 포털 없음). 감싼 요소의 title은 지울 것",
+      "side=\"top\"이면 위로. 면 색은 color (안 주면 잉크)",
+    ],
+    controls: [
+      { key: "side", type: "select", options: [{ value: "bottom", label: "bottom" }, { value: "top", label: "top" }] },
+      { key: "color", type: "select", options: COLORS },
+    ],
+    initial: { side: "bottom" },
+    render: (p) => (
+      <div className="flex items-center gap-1 py-8 text-ink-4">
+        {[
+          { label: "날짜 바꾸기", Icon: CalendarDays },
+          { label: "처음으로", Icon: Home },
+          { label: "모으기", Icon: PiggyBank },
+          { label: "설정", Icon: Settings },
+        ].map(({ label, Icon }) => (
+          <CrayonTooltip key={label} label={label} side={p.side as "top" | "bottom"} color={p.color as string | undefined}>
+            <button type="button" aria-label={label} className="grid size-7 place-items-center rounded-md hover:text-ink-2">
+              <Icon size={15} />
+            </button>
+          </CrayonTooltip>
+        ))}
+      </div>
+    ),
+    code: (p) => `<CrayonTooltip label="날짜 바꾸기"${p.side === "top" ? ' side="top"' : ""}${colorAttr(p.color)}>\n  <button aria-label="날짜 바꾸기"><CalendarDays /></button>\n</CrayonTooltip>`,
   },
 
   {

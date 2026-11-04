@@ -93,4 +93,20 @@
 .crayon-cal-day.crayon-blob::before{border-radius:6px}
 .crayon-cal-today{display:block;width:100%;margin-top:6px;padding:4px 0;border:0;border-radius:var(--radius-s);background:none;font:inherit;font-size:12px;font-weight:600;color:var(--crayon,var(--color-primary));cursor:pointer}
 
-@media (prefers-reduced-motion:reduce){.crayon-wash::before{animation:none}.crayon-bar>.crayon-fill{transition:none}.crayon-draw{animation:none}}
+/* 종이 바탕 (팝오버 · 작은 떠 있는 카드): 따뜻한 종이색 + 고운 종이 결 + 옅은 노랑 크레파스 칠(가장자리 울퉁불퉁).
+   구역을 칠하는 게 아니라 떠 있는 종이 한 장. 칠 색 --crayon-paper (기본 --color-comment-sand-solid) —
+   --crayon(고른 칸 .crayon-pick의 색)과 따로라 위에 놓인 고른 칸이 묻히지 않는다.
+   position은 안 준다 — 팝오버의 fixed · absolute를 덮지 않게. 그냥 놓는 카드면 부르는 쪽이 relative */
+.crayon-paper{isolation:isolate;background-color:color-mix(in oklab,var(--color-surface-warm) 60%,var(--color-surface))}
+.crayon-paper::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='128' height='128' filter='url(%23p)' opacity='0.09'/%3E%3C/svg%3E");background-size:128px 128px}
+.crayon-paper::after{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;background-color:color-mix(in oklab,var(--crayon-paper,var(--color-comment-sand-solid)) 16%,transparent);background-image:repeating-linear-gradient(-7deg,transparent 0 2px,rgb(255 255 255 / .2) 2px 3px,transparent 3px 5px);filter:url(#pastel-block)}
+
+/* 툴팁 (CrayonTooltip): 올리거나 키보드로 포커스하면 이름표(누른 뒤 남은 포커스엔 안 뜸). 옅은 잉크 크레파스 면(#pastel-block — 작은 면에 구멍 덜 남) + 진한 글자, 그림자 없음.
+   보일 땐 0.25초 기다림(아이콘 줄을 훑을 때 깜빡이지 않게), 숨길 땐 바로 */
+.crayon-tip{position:relative;display:inline-flex}
+.crayon-tip-label{pointer-events:none;position:absolute;left:50%;top:calc(100% + 6px);z-index:50;isolation:isolate;padding:3px 8px;white-space:nowrap;font-size:11px;font-weight:500;line-height:16px;color:var(--color-ink-2);opacity:0;translate:-50% -3px;transition:opacity .15s,translate .15s cubic-bezier(.23,1,.32,1)}
+.crayon-tip-label[data-side=top]{top:auto;bottom:calc(100% + 6px);translate:-50% 3px}
+.crayon-tip-label::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:5px;background-color:color-mix(in oklab,var(--crayon,var(--color-ink)) 11%,var(--color-surface));background-image:repeating-linear-gradient(-7deg,transparent 0 2px,rgb(255 255 255 / .18) 2px 3px,transparent 3px 5px);filter:url(#pastel-block)}
+.crayon-tip:hover>.crayon-tip-label,.crayon-tip:has(:focus-visible)>.crayon-tip-label{opacity:1;translate:-50% 0;transition-delay:.25s}
+
+@media (prefers-reduced-motion:reduce){.crayon-tip-label{transition:opacity .15s}.crayon-wash::before{animation:none}.crayon-bar>.crayon-fill{transition:none}.crayon-draw{animation:none}}

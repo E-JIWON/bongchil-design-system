@@ -4,7 +4,7 @@
  *   @import "bongchil-design-system/crayon.css";
  * <CrayonDefs />를 페이지에 한 번 깔아야 crayon.css의 filter:url(#…)가 붙는다.
  */
-export { CrayonDefs, CrayonBar, CrayonWash, CrayonCircle } from "./crayon";
+export { CrayonDefs, CrayonBar, CrayonWash, CrayonCircle, CrayonTooltip } from "./crayon";
 export { CrayonCheck, CrayonSteps, CrayonColumns, CrayonRow, CrayonFrame, CrayonPen } from "./sketch";
 export type { CrayonRowPart } from "./sketch";
 export { CrayonNavItem, CrayonSideTabs } from "./pick";
