@@ -9,3 +9,4 @@ export { CrayonCheck, CrayonSteps, CrayonColumns, CrayonRow, CrayonFrame, Crayon
 export type { CrayonRowPart } from "./sketch";
 export { CrayonNavItem, CrayonSideTabs } from "./pick";
 export type { CrayonSideTab } from "./pick";
+export { CrayonCalendar } from "./calendar";

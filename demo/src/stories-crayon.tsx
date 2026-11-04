@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
 import { CalendarDays, Home, PiggyBank, Settings } from "lucide-react";
-import { CrayonBar, CrayonCheck, CrayonCircle, CrayonColumns, CrayonFrame, CrayonNavItem, CrayonPen, CrayonSideTabs, CrayonSteps, CrayonWash } from "bongchil-design-system/crayon";
+import { CrayonBar, CrayonCalendar, CrayonCheck, CrayonCircle, CrayonColumns, CrayonFrame, CrayonNavItem, CrayonPen, CrayonSideTabs, CrayonSteps, CrayonWash } from "bongchil-design-system/crayon";
 import { type Story } from "./controls";
 
 /* 크레용 타입 스토리 — 기존 스토리와 섞지 않고 네비의 "크레용" 쪽에만 뜬다 */
@@ -111,7 +111,32 @@ function NavDemo({ color }: { color?: string }) {
   );
 }
 
+/** 거래 줄에서 날짜를 바꿀 때 뜨는 작은 팝오버 자리 — 흰 카드, hairline, 그림자 아주 옅게 */
+function CalendarDemo({ color }: { color?: string }) {
+  const [v, setV] = useState<string | null>("2026-11-12");
+  return (
+    <div className="w-[220px] rounded-[10px] border border-border bg-surface p-2 shadow-[0_2px_10px_rgb(0_0_0/0.04)]">
+      <CrayonCalendar value={v} onChange={setV} color={color} />
+    </div>
+  );
+}
+
 export const CRAYON_STORIES: Story[] = [
+  {
+    id: "crayon-calendar",
+    group: "날짜",
+    name: "CrayonCalendar (날짜 달력)",
+    fresh: true,
+    notes: [
+      "DatePickerCalendar의 크레용 짝 — 팝오버 안에 두는 패널, 위치는 부르는 쪽이 감싼다",
+      "고른 날 = 옅은 크레파스 네모 면(.crayon-pick), 오늘 = 손그림 네모 테두리",
+      "value(ISO) · onChange · allowDeselect · showToday · initialMonth는 DatePickerCalendar와 같다",
+    ],
+    controls: [{ key: "color", type: "select", options: COLORS }],
+    render: (p) => <CalendarDemo color={p.color as string | undefined} />,
+    code: (p) => `<CrayonCalendar value={date} onChange={setDate}${colorAttr(p.color)} />`,
+  },
+
   {
     id: "crayon-filters",
     group: "기초",

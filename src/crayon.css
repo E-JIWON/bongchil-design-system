@@ -73,4 +73,24 @@
 .crayon-side-bar{display:block;height:4px;margin:8px 0 0 18px}
 .crayon-side-bar>.crayon-fill{display:block;height:100%;border-radius:1px}
 
+/* 날짜 달력 (calendar.tsx): 머리 ‹ 달 › · 요일 · 7칸 · 오늘. 일요일은 --color-danger.
+   고른 날 = 옅은 크레파스 네모 면(.crayon-pick), 오늘 = 손그림 네모 테두리(.crayon-blob + .crayon-circle-ring) */
+.crayon-cal{width:100%;min-width:0;font-variant-numeric:tabular-nums}
+.crayon-cal-head{display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:6px}
+.crayon-cal-title{min-width:68px;text-align:center;font-size:13px;font-weight:600;color:var(--color-ink-2)}
+.crayon-cal-nav{display:grid;place-items:center;width:22px;height:22px;padding:0;border:0;border-radius:var(--radius-s);background:none;color:var(--color-ink-4);cursor:pointer;transition:color .15s}
+.crayon-cal-nav:hover{color:var(--color-ink)}
+.crayon-cal-nav>svg{width:14px;height:14px;stroke-width:2}
+.crayon-cal-week,.crayon-cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;text-align:center}
+.crayon-cal-week{padding:2px 0;font-size:9.5px;font-weight:500;color:var(--color-ink-4)}
+.crayon-cal-week>[data-sun]{color:color-mix(in oklab,var(--color-danger) 70%,transparent)}
+.crayon-cal-day{position:relative;isolation:isolate;display:grid;place-items:center;aspect-ratio:1;width:100%;min-width:0;padding:0;border:0;border-radius:6px;background:none;font:inherit;font-size:12px;color:var(--color-ink-2);cursor:pointer;user-select:none;transition:color .15s;--crayon-blob-inset:1px}
+.crayon-cal-day:hover{color:var(--crayon,var(--color-primary))}
+.crayon-cal-day[data-sun]{color:color-mix(in oklab,var(--color-danger) 80%,transparent)}
+.crayon-cal-day[aria-current]{font-weight:700;color:var(--crayon,var(--color-primary))}
+.crayon-cal-day[aria-pressed=true]{font-weight:700;color:var(--color-ink)}
+.crayon-cal-day:focus-visible{outline:2px solid color-mix(in oklab,var(--crayon,var(--color-primary)) 50%,transparent);outline-offset:-2px}
+.crayon-cal-day.crayon-blob::before{border-radius:6px}
+.crayon-cal-today{display:block;width:100%;margin-top:6px;padding:4px 0;border:0;border-radius:var(--radius-s);background:none;font:inherit;font-size:12px;font-weight:600;color:var(--crayon,var(--color-primary));cursor:pointer}
+
 @media (prefers-reduced-motion:reduce){.crayon-wash::before{animation:none}.crayon-bar>.crayon-fill{transition:none}.crayon-draw{animation:none}}
