@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, type CSSProperties, type KeyboardEvent } from "react";
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, type CSSProperties, type KeyboardEvent } from "react";
 import { ChevronDown, Check, type LucideIcon } from "lucide-react";
 import { LiquidGlass } from "../liquid-glass";
 import { BasicGlass } from "../basic-glass";
@@ -125,6 +125,7 @@ export function CategorySelect({
   onChange,
   options,
   align = "right",
+  side = "auto",
   placeholder,
   size = "md",
   variant = "grain",
@@ -137,6 +138,9 @@ export function CategorySelect({
   onChange: (value: string) => void;
   options: CategoryOption[];
   align?: "left" | "right";
+  /** 패널을 여는 쪽 — auto는 아래가 모자라면(스크롤 상자 · 화면 바닥) 위로 연다. 모달 안 표의 아래쪽 줄에서
+   *  패널이 스크롤 상자를 늘려 스크롤바가 생기던 문제 */
+  side?: "auto" | "bottom" | "top";
   /** 선택 전 표시 — 아이콘을 곁들이려면 노드로 넘긴다 (에디터의 "🗂 서랍장") */
   placeholder?: React.ReactNode;
   size?: CategorySelectSize;
@@ -165,6 +169,27 @@ export function CategorySelect({
   const sz = SIZE[size];
 
   const openMenu = useCallback(() => setOpen(true), [setOpen]);
+
+  // 열 때 아래 · 위 남은 높이를 재서 고름 — 기준은 가장 가까운 스크롤(또는 overflow 숨김) 상자, 없으면 화면.
+  // 패널 높이는 그리기 전이라 어림값(행 34px · 목록 상한 220px + 여백, footer 한 줄)
+  const [up, setUp] = useState(side === "top");
+  useLayoutEffect(() => {
+    if (!open || side !== "auto" || !ref.current) return;
+    const r = ref.current.getBoundingClientRect();
+    let top = 0;
+    let bottom = window.innerHeight;
+    for (let p = ref.current.parentElement; p; p = p.parentElement) {
+      if (/(auto|scroll|hidden)/.test(getComputedStyle(p).overflowY)) {
+        const b = p.getBoundingClientRect();
+        top = Math.max(top, b.top);
+        bottom = Math.min(bottom, b.bottom);
+        break;
+      }
+    }
+    const need = (renderOptions ? 120 : Math.min(options.length * 34, 220)) + 22 + (footer ? 36 : 0);
+    const below = bottom - r.bottom;
+    setUp(below < need && r.top - top > below);
+  }, [open, side, options.length, renderOptions, footer]);
 
   // 열릴 때 키보드 하이라이트를 현재 값에 맞춘다.
   // effect가 아니라 렌더 중 조정(React의 "props 변화에 맞춰 state 조정" 패턴) — 바깥에서 연 경우(controlled)도
@@ -406,7 +431,7 @@ export function CategorySelect({
   // `w-fit`(fit-content)은 내용 폭으로 정확히 줄어든다.
   // 상한은 뷰포트도 같이 본다 — 좁은 화면에서 오른쪽 정렬 패널이 화면 밖으로 나가지 않게 (DockPopover와 같은 방식)
   // 상한 180px — 260px은 이름이 긴 카테고리 하나 때문에 패널 전체가 트리거의 3배로 벌어졌다. 긴 라벨은 truncate가 받는다
-  const menuBase = `select-menu-enter absolute z-50 mt-1.5 w-fit min-w-full max-w-[min(180px,calc(100vw-2rem))] overflow-hidden rounded-xl shadow-[0_10px_28px_rgb(var(--shadow-ink)/0.14)] ${
+  const menuBase = `select-menu-enter absolute z-50 ${(side === "auto" ? up : side === "top") ? "bottom-full mb-1.5" : "top-full mt-1.5"} w-fit min-w-full max-w-[min(180px,calc(100vw-2rem))] overflow-hidden rounded-xl shadow-[0_10px_28px_rgb(var(--shadow-ink)/0.14)] ${
     align === "right" ? "right-0" : "left-0"
   }`;
   const items = (
