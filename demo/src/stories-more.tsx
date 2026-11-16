@@ -77,9 +77,10 @@ export const MORE_STORIES: Story[] = [
     controls: [
       { key: "variant", type: "select", options: opts("field", "inline") },
       { key: "range", type: "bool" },
+      { key: "look", type: "select", options: opts("glass", "crayon") },
     ],
-    initial: { variant: "field" },
-    render: (p) => <DatePickerDemo variant={p.variant as "field" | "inline"} range={Boolean(p.range)} />,
+    initial: { variant: "field", look: "glass" },
+    render: (p) => <DatePickerDemo variant={p.variant as "field" | "inline"} range={Boolean(p.range)} look={p.look as "glass" | "crayon"} />,
     code: (p) =>
       p.range
         ? `<DatePicker\n  value={start}\n  endValue={end}\n  onChange={setStart}\n  onRangeChange={(s, e) => { setStart(s); setEnd(e); }}\n/>`
@@ -381,13 +382,13 @@ function FilterChipsDemo() {
   return <FilterChips items={FILTER_ITEMS} value={v} onChange={setV} />;
 }
 
-function DatePickerDemo({ variant, range }: { variant: "field" | "inline"; range: boolean }) {
+function DatePickerDemo({ variant, range, look }: { variant: "field" | "inline"; range: boolean; look?: "glass" | "crayon" }) {
   const [date, setDate] = useState("2026-09-15");
   const [end, setEnd] = useState<string | undefined>("2026-09-18");
   return range ? (
     <DatePicker value={date} onChange={setDate} endValue={end} onRangeChange={(s, e) => { setDate(s); setEnd(e ?? undefined); }} variant={variant} />
   ) : (
-    <DatePicker value={date} onChange={setDate} variant={variant} />
+    <DatePicker value={date} onChange={setDate} variant={variant} look={look} />
   );
 }
 

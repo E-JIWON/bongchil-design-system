@@ -31,6 +31,7 @@ import {
   PageTitle,
   TodoCheckbox,
   useToast,
+  ToastProvider,
   type CategoryColor,
   type CategoryOption,
 } from "bongchil-design-system";
@@ -331,15 +332,20 @@ export const STORIES: Story[] = [
     id: "category-select",
     group: "카테고리",
     name: "CategorySelect",
-    notes: ["패널은 portal로 뜬다 — 부모 overflow에 안 잘린다"],
+    notes: [
+      "패널은 portal로 뜬다 — 부모 overflow에 안 잘린다",
+      "variant=\"crayon\" — 흰 종이 판(.crayon-pop) + 고른 값은 칠한 칸. searchable · columns · renderCreate · mobileSheet · anchor는 옵션(기본 꺼짐)",
+    ],
     controls: [
       { key: "size", type: "select", options: opts("xs", "sm", "md", "lg") },
-      { key: "variant", type: "select", options: opts("grain", "liquid", "dotted", "text") },
+      { key: "variant", type: "select", options: opts("grain", "liquid", "dotted", "text", "crayon") },
       { key: "align", type: "select", options: opts("left", "right") },
+      { key: "searchable", type: "bool" },
+      { key: "columns", type: "bool" },
     ],
     initial: { size: "md", variant: "grain", align: "left" },
     render: (p) => (
-      <CategorySelectDemo size={p.size as never} variant={p.variant as never} align={p.align as never} />
+      <CategorySelectDemo size={p.size as never} variant={p.variant as never} align={p.align as never} searchable={Boolean(p.searchable)} columns={p.columns ? 3 : undefined} />
     ),
     code: (p) => snippet("CategorySelect", { value: "{cat}", onChange: "{setCat}", options: "{CAT_OPTIONS}", size: p.size === "md" ? undefined : p.size, variant: p.variant === "grain" ? undefined : p.variant, align: p.align }),
   },
@@ -432,6 +438,18 @@ export const STORIES: Story[] = [
     notes: ["액션 토스트는 TOAST_ACTION_MS 동안 떠 있다 — 그 사이 되돌릴 수 있다"],
     render: () => <ToastDemo />,
     code: () => `const toast = useToast();\ntoast.info("문득 하나 지웠어요", {\n  label: "다시 적기",\n  onClick: () => restore(),\n});`,
+  },
+  {
+    id: "toast-crayon",
+    group: "피드백",
+    name: "ToastProvider look=\"crayon\"",
+    notes: [
+      "크레파스로 칠한 진한 띠 — 폭 520px, 긴 글은 줄바꿈. 성공 초록 · 오류 주황 · 알림 · 되돌리기 잉크",
+      "placement(top | bottom) · max · closeButton · duration은 두 look 모두의 옵션(기본값 = 예전 동작)",
+      "컴포넌트 밖에서는 toast.success / error / info(메시지, action?)",
+    ],
+    render: () => <CrayonToastDemo />,
+    code: () => `<ToastProvider look="crayon" placement="bottom" max={4} closeButton>\n  {children}\n</ToastProvider>`,
   },
 
 
@@ -615,14 +633,27 @@ function CategorySelectDemo({
   size,
   variant,
   align,
+  searchable,
+  columns,
 }: {
   size: "xs" | "sm" | "md" | "lg";
-  variant: "grain" | "liquid" | "dotted" | "text";
+  variant: "grain" | "liquid" | "dotted" | "text" | "crayon";
   align: "left" | "right";
+  searchable?: boolean;
+  columns?: number;
 }) {
   const [cat, setCat] = useState("note");
   return (
-    <CategorySelect value={cat} onChange={setCat} options={CAT_OPTIONS} size={size} variant={variant} align={align} />
+    <CategorySelect value={cat} onChange={setCat} options={CAT_OPTIONS} size={size} variant={variant} align={align} searchable={searchable} columns={columns} />
+  );
+}
+
+/** 크레용 띠 — 이 칸 안에서만 다른 Provider(look="crayon")를 깐다 */
+function CrayonToastDemo() {
+  return (
+    <ToastProvider look="crayon" placement="bottom" max={4} closeButton>
+      <ToastDemo />
+    </ToastProvider>
   );
 }
 
