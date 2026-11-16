@@ -9,6 +9,8 @@ import { LiquidGlass } from "../liquid-glass";
 import { GrainNoise } from "../grain";
 import { Button } from "../button";
 import { MonthPicker } from "../month-picker";
+import { AnchoredPop, type PopAnchor } from "../anchored-pop";
+import { CrayonCalendar } from "../../crayon/calendar";
 
 /** 선택 원·배지용 소프트 그레인 오라 — 가장자리로 갈수록 투명해져 두둥실 뜬 느낌 */
 const SOFT_AURA: CSSProperties = {
@@ -301,6 +303,53 @@ export function DatePickerCalendar({
 
 export type DatePickerVariant = "field" | "inline";
 export type DatePickerAlign = "left" | "right";
+/**
+ * 판 모양 — glass: LiquidGlass + DatePickerCalendar(기본) ·
+ * crayon: `.crayon-pop`(흰 종이 판 + 손 테두리) + CrayonCalendar. crayon.css와 <CrayonDefs />가 있어야 하고,
+ * CrayonCalendar는 하루만 고르므로 범위 모드(onRangeChange)는 쓰지 않는다
+ */
+export type DatePickerLook = "glass" | "crayon";
+
+/**
+ * 버튼 없는 달력 — 부르는 쪽이 열고 닫는다(표 칸의 날짜 바꾸기처럼 트리거가 밖에 있을 때).
+ * `anchor`(누른 버튼의 DOMRect나 요소) 바로 아래에 붙고, 모자라면 위로 · 좌우는 화면 안으로.
+ * 고르면 `onChange` 뒤 바로 `onClose`. 바깥 클릭 · Esc · 스크롤로도 닫힌다.
+ */
+export function DatePickerPop({
+  anchor,
+  value,
+  onChange,
+  onClose,
+  look = "glass",
+  align = "left",
+  portal = false,
+}: {
+  anchor: PopAnchor | null | undefined;
+  value: string;
+  onChange: (iso: string) => void;
+  onClose: () => void;
+  look?: DatePickerLook;
+  align?: DatePickerAlign;
+  /** body로 내보내 그린다 — 조상에 transform이 있을 때. <dialog> 안에서는 쓰지 말 것 */
+  portal?: boolean;
+}) {
+  const pick = (iso: string | null) => {
+    if (!iso) return;
+    onChange(iso);
+    onClose();
+  };
+  return look === "crayon" ? (
+    <AnchoredPop anchor={anchor} onClose={onClose} align={align} width={220} portal={portal} className="crayon-pop date-picker-portal rounded-[10px] p-2">
+      <CrayonCalendar value={value} onChange={pick} />
+    </AnchoredPop>
+  ) : (
+    <AnchoredPop anchor={anchor} onClose={onClose} align={align} gap={8} width={208} portal={portal} className="date-picker-portal">
+      <LiquidGlass className="rounded-xl p-2">
+        <DatePickerCalendar value={value} onChange={pick} />
+      </LiquidGlass>
+    </AnchoredPop>
+  );
+}
 
 export function DatePicker({
   value,
@@ -312,9 +361,12 @@ export function DatePicker({
   placeholder = "날짜 선택",
   label,
   triggerClassName = "",
+  look = "glass",
 }: {
   value: string;
   onChange: (iso: string) => void;
+  /** 판 모양 — 기본 유리. "crayon"은 흰 종이 판 + 크레용 달력(하루 선택만) */
+  look?: DatePickerLook;
   /** 끝날짜 — `onRangeChange`와 같이 주면 범위 선택 모드가 켜진다 */
   endValue?: string | null;
   /** 범위 확정 콜백. 끝날짜가 없으면(하루짜리) `null`이 온다 */
@@ -428,6 +480,11 @@ export function DatePicker({
           {/* 바깥클릭 닫기는 document mousedown 핸들러가 처리하므로 이 레이어는 포인터를 통과시켜
               배경 스크롤을 막지 않는다(스크롤 시 scroll 리스너가 팝업을 트리거에 재정렬) */}
           <div className="date-picker-portal pointer-events-none fixed inset-0 z-[299]" aria-hidden />
+          {look === "crayon" ? (
+            <div ref={panelRef} className="crayon-pop date-picker-portal fixed z-[300] w-[220px] rounded-[10px] p-2" style={popupStyle}>
+              <CrayonCalendar value={value || null} onChange={(iso) => { if (iso) handleChange(iso); }} />
+            </div>
+          ) : (
           <div ref={panelRef} className="date-picker-portal fixed z-[300] w-[13rem]" style={popupStyle}>
             <LiquidGlass className="rounded-xl p-2">
               <DatePickerCalendar
@@ -449,6 +506,7 @@ export function DatePicker({
               />
             </LiquidGlass>
           </div>
+          )}
         </>,
         document.body,
       )}
