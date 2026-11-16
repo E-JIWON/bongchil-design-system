@@ -144,6 +144,7 @@ export function CategorySelect({
   renderCreate,
   mobileSheet = false,
   anchor,
+  ignore,
   menuWidth,
 }: {
   value: string;
@@ -184,6 +185,8 @@ export function CategorySelect({
    * (`open` 안 주면 열림, 닫힐 때 `onOpenChange(false)`). 왼쪽 선 맞춤, `align="right"`면 오른쪽 선
    */
   anchor?: PopAnchor | null;
+  /** anchor로 띄울 때 바깥으로 치지 않을 요소(누른 칸) — 여기를 눌러도 닫지 않는다. 칸이 스스로 여닫을 때 */
+  ignore?: HTMLElement | null;
   /** 목록 폭(px) — anchor로 띄울 때 기본: 격자 168 · 검색 176 · 그 외 160 */
   menuWidth?: number;
 }) {
@@ -543,7 +546,7 @@ export function CategorySelect({
     } else if (open && anchored) {
       const w = menuWidth ?? (columns ? 168 : searchable ? 176 : 160);
       panel = (
-        <AnchoredPop anchor={anchor} onClose={close} align={align} gap={2} width={w} role="listbox" className={crayon ? "crayon-pop select-menu-enter" : "select-menu-enter"}>
+        <AnchoredPop anchor={anchor} onClose={close} align={align} gap={2} width={w} ignore={ignore} role="listbox" className={crayon ? "crayon-pop select-menu-enter" : "select-menu-enter"}>
           {crayon ? menu(false) : <BasicGlass opaque className="overflow-hidden rounded-xl shadow-[0_10px_28px_rgb(var(--shadow-ink)/0.12)]">{menu(false)}</BasicGlass>}
         </AnchoredPop>
       );
