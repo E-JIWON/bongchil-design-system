@@ -66,7 +66,8 @@ export { ImageEditor } from "./ui/image-editor";
 // ── 레이아웃·피드백 ──
 export { PageTitle } from "./ui/page-title";
 export { EmptyState, EMPTY_ACTIONS } from "./ui/empty-state";
-export { ToastProvider, useToast, TOAST_ACTION_MS } from "./ui/toast";
+export { ToastProvider, useToast, toast, TOAST_ACTION_MS } from "./ui/toast";
+export type { ToastAction, ToastLook, ToastPlacement, ToastDuration } from "./ui/toast";
 // 누른 자리에 붙여 띄우는 판 — 버튼 없이 부르는 쪽이 여닫는 팝오버 껍데기
 export { AnchoredPop } from "./ui/anchored-pop";
 export type { PopAnchor } from "./ui/anchored-pop";
