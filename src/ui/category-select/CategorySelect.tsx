@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect, useLayoutEffect, useCallback, type CSSProperties, type KeyboardEvent } from "react";
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useSyncExternalStore, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import { ChevronDown, Check, type LucideIcon } from "lucide-react";
 import { LiquidGlass } from "../liquid-glass";
 import { BasicGlass } from "../basic-glass";
 import { GrainNoise, grainAura, grainText, CONTROL_SIZES, type ControlSize } from "../grain";
+import { AnchoredPop, type PopAnchor } from "../anchored-pop";
+import { BottomSheet } from "../bottom-sheet";
 
 export type CategoryOption = {
   value: string;
@@ -27,8 +29,10 @@ export type CategorySelectSize = ControlSize;
  * - `grain`  : 카테고리색 오라 + 그레인 (**기본** — 카테고리 칩·버튼과 같은 재질 언어)
  * - `dotted` : 파선 테두리(열림·선택 = 실선 + 옅은 틴트)
  * - `text`   : 표면 없는 밑줄 텍스트 (가장 약한 위계)
+ * - `crayon` : 크레용 — 버튼은 text와 같고, 목록은 흰 종이 판(`.crayon-pop`) · 고른 값은 칠한 칸(`.crayon-pick`).
+ *              crayon.css와 <CrayonDefs />가 있어야 한다
  */
-export type CategorySelectVariant = "liquid" | "grain" | "dotted" | "text";
+export type CategorySelectVariant = "liquid" | "grain" | "dotted" | "text" | "crayon";
 
 /**
  * 중앙 그레인 오라 — 색이 가운데(50% 50%)서 좌우로 번진다.
@@ -84,6 +88,7 @@ const PANEL_ACCENT: Record<CategorySelectVariant, string> = {
   grain: "",
   dotted: "",
   text: "border-transparent",
+  crayon: "",
 };
 
 /** 옵션의 아이콘 또는 색 점 렌더 — 선택된 자리(트리거·선택행)에선 글자색을 그대로 따라간다 */
@@ -133,6 +138,13 @@ export function CategorySelect({
   renderOptions,
   open: controlledOpen,
   onOpenChange,
+  searchable = false,
+  columns,
+  renderOption,
+  renderCreate,
+  mobileSheet = false,
+  anchor,
+  menuWidth,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -152,9 +164,38 @@ export function CategorySelect({
   /** 바깥에서 여닫아야 할 때만 (에디터 발행 검증·체크리스트가 "카테고리를 고르세요"로 열어준다) */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /* ── 아래는 전부 옵션(기본 꺼짐) — 하나라도 켜거나 variant="crayon"이면 목록을 새 메뉴(SelectMenu)로 그린다 ── */
+  /** 목록 위 검색창 — 치면 거르고, ↑↓로 고르고 Enter로 확정 */
+  searchable?: boolean;
+  /** 격자 판 — 짧고 순서 있는 값(할부 개월 · 날짜)을 n열로. ←→ 한 칸, ↑↓ 한 줄 */
+  columns?: number;
+  /** 한 줄의 속을 직접 그린다 (앱 고유 아이콘 · 색 이름표). 체크 · 고른 칸 표시는 메뉴가 붙인다 */
+  renderOption?: (option: CategoryOption, state: { selected: boolean; active: boolean }) => ReactNode;
+  /**
+   * 즉석 생성 칸 — 검색어와 이름이 같은 옵션이 없을 때 목록 아래에 뜬다(searchable과 같이).
+   * 만든 값을 `select(value)`로 넘기면 고르고 닫는다. 칸 안 버튼에 `data-select-create-submit`을 붙이면
+   * 고를 줄이 없을 때 Enter가 그 버튼을 누른다
+   */
+  renderCreate?: (api: { query: string; select: (value: string) => void }) => ReactNode;
+  /** 좁은 화면에선 목록을 바닥 시트(BottomSheet)로. true = 767px 이하, 글자를 주면 그 미디어 쿼리 */
+  mobileSheet?: boolean | string;
+  /**
+   * 버튼 없이 이 자리(DOMRect · 요소) 옆에 띄운다 — 표 칸을 눌러 여는 셀렉트. 여닫기는 부르는 쪽이
+   * (`open` 안 주면 열림, 닫힐 때 `onOpenChange(false)`). 왼쪽 선 맞춤, `align="right"`면 오른쪽 선
+   */
+  anchor?: PopAnchor | null;
+  /** 목록 폭(px) — anchor로 띄울 때 기본: 격자 168 · 검색 176 · 그 외 160 */
+  menuWidth?: number;
 }) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
-  const open = controlledOpen ?? uncontrolledOpen;
+  const anchored = anchor !== undefined;
+  const open = controlledOpen ?? (anchored ? true : uncontrolledOpen);
+  /** 새 메뉴로 그리나 — 옵션을 하나도 안 켰으면 아래 예전 목록 그대로 */
+  const rich = variant === "crayon" || searchable || Boolean(columns || renderOption || renderCreate || mobileSheet) || anchored;
+  const sheet = useMedia(mobileSheet ? (typeof mobileSheet === "string" ? mobileSheet : "(max-width: 767px)") : null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  // 바닥 시트는 내려가는 움직임을 보여 주고 닫는다
+  const [closing, setClosing] = useState(false);
   const [active, setActive] = useState(0); // 키보드 하이라이트 인덱스
   const ref = useRef<HTMLDivElement>(null);
   const setOpen = useCallback(
@@ -212,6 +253,8 @@ export function CategorySelect({
   useEffect(() => {
     if (!open) return;
     function onClick(e: MouseEvent) {
+      // 바닥 시트는 body로 나가 있어 ref 밖이다 — 시트 안을 누른 건 바깥이 아니다(시트는 딤이 닫는다)
+      if (sheetRef.current?.contains(e.target as Node)) return;
       if (ref.current && !ref.current.contains(e.target as Node)) close();
     }
     document.addEventListener("mousedown", onClick);
@@ -220,6 +263,8 @@ export function CategorySelect({
 
   /** 트리거 버튼 키 처리 — 위/아래 이동, Enter 선택, Esc 닫기 */
   function onKeyDown(e: KeyboardEvent<HTMLButtonElement>) {
+    // 새 메뉴는 열리면 키를 메뉴(검색창)가 받는다 — 여기선 여는 것만
+    if (rich && open) return;
     if (!open) {
       if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter" || e.key === " ") {
         e.preventDefault();
@@ -386,7 +431,7 @@ export function CategorySelect({
         <span className={`flex min-w-0 items-center ${innerGap}`}>{triggerInner}</span>
       </button>
     );
-  } else if (variant === "text") {
+  } else if (variant === "text" || variant === "crayon") {
     // 표면 없음 — 밑줄만. Button variant="text"와 같은 방식(내용 span의 border-bottom)
     const c = selected?.cssColor ?? "var(--color-ink)";
     triggerNode = (
@@ -457,6 +502,72 @@ export function CategorySelect({
     </div>
   );
 
+  if (rich) {
+    const crayon = variant === "crayon";
+    const pick = (v: string) => {
+      onChange(v);
+      close();
+    };
+    const menu = (mobile: boolean) => (
+      <SelectMenu
+        options={options}
+        value={value}
+        onPick={pick}
+        onClose={close}
+        searchable={searchable}
+        columns={columns}
+        renderOption={renderOption}
+        renderCreate={renderCreate}
+        crayon={crayon}
+        mobile={mobile}
+        iconSize={sz.iconSize}
+        footer={footer}
+      />
+    );
+    let panel: ReactNode = null;
+    if (open && sheet) {
+      const shut = () => {
+        if (closing) return;
+        setClosing(true);
+        setTimeout(() => {
+          setClosing(false);
+          close();
+        }, 220);
+      };
+      panel = (
+        // --kb: 소프트 키보드 높이(앱이 채움, 없으면 0) — 시트가 키보드 위로
+        <BottomSheet closing={closing} onClose={shut} panelClassName="mb-[var(--kb,0px)]">
+          <div ref={sheetRef}>{menu(true)}</div>
+        </BottomSheet>
+      );
+    } else if (open && anchored) {
+      const w = menuWidth ?? (columns ? 168 : searchable ? 176 : 160);
+      panel = (
+        <AnchoredPop anchor={anchor} onClose={close} align={align} gap={2} width={w} role="listbox" className={crayon ? "crayon-pop select-menu-enter" : "select-menu-enter"}>
+          {crayon ? menu(false) : <BasicGlass opaque className="overflow-hidden rounded-xl shadow-[0_10px_28px_rgb(var(--shadow-ink)/0.12)]">{menu(false)}</BasicGlass>}
+        </AnchoredPop>
+      );
+    } else if (open) {
+      const place = `select-menu-enter absolute z-50 ${(side === "auto" ? up : side === "top") ? "bottom-full mb-1.5" : "top-full mt-1.5"} ${align === "right" ? "right-0" : "left-0"}`;
+      const size: CSSProperties = menuWidth ? { width: menuWidth } : { minWidth: columns ? 168 : searchable ? 160 : "100%", maxWidth: "min(220px, calc(100vw - 2rem))" };
+      panel = crayon ? (
+        <div role="listbox" className={`crayon-pop w-max ${place}`} style={size}>{menu(false)}</div>
+      ) : (
+        <BasicGlass role="listbox" opaque className={`w-max overflow-hidden rounded-xl shadow-[0_10px_28px_rgb(var(--shadow-ink)/0.12)] ${place} ${PANEL_ACCENT[variant]}`} style={size}>
+          {menu(false)}
+        </BasicGlass>
+      );
+    }
+    // 버튼 없이 띄울 땐 감싸는 상자도 없다 — 칸 안에 끼워도 자리를 안 차지하게
+    if (anchored) return <>{panel}</>;
+    return (
+      <div ref={ref} className="relative">
+        {triggerNode}
+        {panel}
+      </div>
+    );
+  }
+
   return (
     <div ref={ref} className="relative">
       {triggerNode}
@@ -482,5 +593,183 @@ export function CategorySelect({
         </BasicGlass>
       )}
     </div>
+  );
+}
+
+/** 미디어 쿼리 구독 — query가 null이면 늘 false (서버 렌더에서도 false) */
+function useMedia(query: string | null): boolean {
+  return useSyncExternalStore(
+    (onChange) => {
+      if (!query) return () => {};
+      const mql = window.matchMedia(query);
+      mql.addEventListener("change", onChange);
+      return () => mql.removeEventListener("change", onChange);
+    },
+    () => (query ? window.matchMedia(query).matches : false),
+    () => false,
+  );
+}
+
+/**
+ * 새 메뉴의 속 — 검색 · 목록(또는 격자) · 즉석 생성 칸. 버튼 아래에 여는 것 · 칸 옆에 띄우는 것 · 바닥 시트가 같이 쓴다.
+ * 표면(판)은 감싸는 쪽이 준다.
+ */
+function SelectMenu({
+  options,
+  value,
+  onPick,
+  onClose,
+  searchable,
+  columns,
+  renderOption,
+  renderCreate,
+  crayon,
+  mobile,
+  iconSize,
+  footer,
+}: {
+  options: CategoryOption[];
+  value: string;
+  onPick: (value: string) => void;
+  onClose: () => void;
+  searchable: boolean;
+  columns?: number;
+  renderOption?: (option: CategoryOption, state: { selected: boolean; active: boolean }) => ReactNode;
+  renderCreate?: (api: { query: string; select: (value: string) => void }) => ReactNode;
+  crayon: boolean;
+  mobile: boolean;
+  iconSize: number;
+  footer?: ReactNode;
+}) {
+  const [search, setSearch] = useState("");
+  const [active, setActive] = useState(() => Math.max(0, options.findIndex((o) => o.value === value)));
+  const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const createRef = useRef<HTMLDivElement>(null);
+
+  const trimmed = search.trim();
+  const filtered = trimmed ? options.filter((o) => o.label.toLowerCase().includes(trimmed.toLowerCase())) : options;
+  const exact = trimmed ? options.some((o) => o.label.toLowerCase() === trimmed.toLowerCase()) : true;
+  const canCreate = Boolean(renderCreate) && Boolean(trimmed) && !exact;
+
+  // 열리면 키를 받게 포커스 — 터치 화면의 검색창은 뺀다(열자마자 키보드가 목록을 가린다)
+  useEffect(() => {
+    if (searchable && window.matchMedia("(pointer: coarse)").matches) return;
+    const t = setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 30);
+    return () => clearTimeout(t);
+  }, [searchable]);
+
+  // 가리키는 줄이 보이게
+  useEffect(() => {
+    (listRef.current?.children[active] as HTMLElement | undefined)?.scrollIntoView?.({ block: "nearest" });
+  }, [active]);
+
+  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.nativeEvent.isComposing) return;
+    const step = columns ?? 1;
+    const move = (d: number) => {
+      e.preventDefault();
+      setActive((i) => Math.min(Math.max(i + d, 0), filtered.length - 1));
+    };
+    if (e.key === "ArrowDown") move(step);
+    else if (e.key === "ArrowUp") move(-step);
+    else if (columns && e.key === "ArrowRight") move(1);
+    else if (columns && e.key === "ArrowLeft") move(-1);
+    else if (e.key === "Enter" || e.key === "Tab") {
+      e.preventDefault();
+      if (filtered[active]) onPick(filtered[active].value);
+      else if (canCreate) createRef.current?.querySelector<HTMLElement>("[data-select-create-submit]")?.click();
+    } else if (e.key === "Escape") {
+      e.stopPropagation();
+      onClose();
+    }
+  };
+
+  return (
+    <>
+      {searchable ? (
+        <div className={`border-b border-border ${mobile ? "p-3" : "p-2"}`}>
+          <div className="relative">
+            <svg width={mobile ? 14 : 12} height={mobile ? 14 : 12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className={`absolute top-1/2 -translate-y-1/2 text-ink-4 ${mobile ? "left-3" : "left-2.5"}`} aria-hidden>
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3.5-3.5" />
+            </svg>
+            <input
+              ref={inputRef}
+              type="text"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setActive(0);
+              }}
+              onKeyDown={onKeyDown}
+              placeholder="검색..."
+              // 폰은 16px 미만이면 iOS가 입력할 때 화면을 확대한다
+              className={`w-full rounded-md bg-surface-subtle outline-none ${mobile ? "py-2.5 pl-9 pr-3 text-[16px]" : "py-1.5 pl-7 pr-3 text-[12px]"}`}
+            />
+          </div>
+        </div>
+      ) : (
+        <input ref={inputRef} className="sr-only" onKeyDown={onKeyDown} aria-label="고르기" readOnly />
+      )}
+
+      <div
+        ref={listRef}
+        // 시트에선 목록을 밀 때 시트가 같이 끌려 내려가지 않게 터치를 여기서 끊는다
+        onTouchStart={mobile ? (e) => e.stopPropagation() : undefined}
+        className={`overflow-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${columns ? "grid gap-0.5 p-1.5" : "p-1"} ${
+          mobile ? "max-h-[min(50dvh,calc(var(--vvh,100dvh)-11rem))] overscroll-contain" : "max-h-52"
+        }`}
+        style={columns ? { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` } : undefined}
+      >
+        {filtered.length === 0 && !canCreate ? (
+          <div className="px-3 py-2 text-[12px] text-ink-3">결과 없음</div>
+        ) : (
+          filtered.map((opt, i) => {
+            const selected = opt.value === value;
+            const hi = !mobile && i === active;
+            const c = opt.cssColor ?? "var(--color-primary)";
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                role="option"
+                aria-selected={selected}
+                onClick={() => onPick(opt.value)}
+                onMouseEnter={() => setActive(i)}
+                className={`flex w-full cursor-pointer items-center gap-2 rounded-[4px] transition-colors ${
+                  columns ? "justify-center px-1 text-center tabular-nums" : "px-2 text-left"
+                } ${mobile ? "min-h-11 py-2.5 text-[15px]" : columns ? "py-1.5 text-[12px]" : "py-1.5 text-[13px]"} ${
+                  // 고른 값 — 크레용은 칠한 칸(.crayon-pick), 그 외는 옅은 틴트. 가리키는 줄은 옅은 바탕
+                  selected ? `font-medium text-primary ${crayon ? "crayon-pick" : ""}` : hi ? "bg-ink/[0.05]" : ""
+                }`}
+                style={selected && !crayon ? { background: `color-mix(in srgb, ${c} 8%, transparent)` } : undefined}
+              >
+                {renderOption ? (
+                  renderOption(opt, { selected, active: hi })
+                ) : (
+                  <>
+                    {!columns && <OptionMark option={opt} size={iconSize} lit={selected} />}
+                    <span className={`truncate ${columns ? "" : "flex-1"}`}>{opt.label}</span>
+                  </>
+                )}
+                {!columns && selected && <Check size={mobile ? 14 : 12} className="shrink-0 text-primary" />}
+              </button>
+            );
+          })
+        )}
+      </div>
+
+      {canCreate && renderCreate && (
+        <div ref={createRef} className="border-t border-border p-2">
+          {renderCreate({ query: trimmed, select: onPick })}
+        </div>
+      )}
+      {footer && (
+        <div onClick={onClose} className="whitespace-nowrap border-t border-border/50 p-1">
+          {footer}
+        </div>
+      )}
+    </>
   );
 }
