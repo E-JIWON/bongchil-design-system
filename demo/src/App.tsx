@@ -14,6 +14,7 @@ const TWINS: Record<string, string> = {
   "todo-checkbox": "crayon-check",
   "nav-tabs": "crayon-wash",
   "notice-area": "crayon-frame",
+  "category-pill": "crayon-chip",
 };
 const twinOf = (id: string) => CRAYON_STORIES.find((s) => s.id === TWINS[id]);
 const isCrayon = (s: Story) => CRAYON_STORIES.includes(s);
