@@ -129,5 +129,6 @@
 .crayon-chip[aria-pressed=true]::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background:color-mix(in oklab,var(--crayon,var(--color-primary)) 22%,transparent);filter:url(#crayon)}
 .crayon-chip-sm{height:30px;padding:0 10px;gap:5px;border-radius:8px;font-size:12.5px}
 .crayon-chip-sm>svg{width:13px;height:13px}
-.crayon-chip-struck[aria-pressed=false]{color:var(--color-ink-4);text-decoration:line-through;text-decoration-color:color-mix(in oklab,var(--color-ink-4) 50%,transparent)}
+.crayon-chip-struck[aria-pressed=false]{color:var(--color-ink-4)}
+.crayon-chip-struck[aria-pressed=false]>span{text-decoration:line-through;text-decoration-color:color-mix(in oklab,var(--color-ink-4) 50%,transparent)}
 @media (prefers-reduced-motion:reduce){.crayon-chip{transition:none}}
