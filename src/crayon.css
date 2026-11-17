@@ -124,9 +124,9 @@
 .crayon-chip:hover{border-color:var(--color-border-strong);color:var(--color-ink)}
 .crayon-chip:active{transform:scale(.97)}
 .crayon-chip:focus-visible{outline:2px solid color-mix(in oklab,var(--crayon,var(--color-primary)) 50%,transparent);outline-offset:1px}
-.crayon-chip[aria-pressed=true]{border-color:transparent;color:var(--color-ink)}
-.crayon-chip[aria-pressed=true]>svg{color:var(--crayon,var(--color-primary))}
-.crayon-chip[aria-pressed=true]::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background:color-mix(in oklab,var(--crayon,var(--color-primary)) 22%,transparent);filter:url(#crayon)}
+.crayon-chip[aria-pressed=true],.crayon-chip[aria-selected=true]{border-color:transparent;color:var(--color-ink)}
+.crayon-chip[aria-pressed=true]>svg,.crayon-chip[aria-selected=true]>svg{color:var(--crayon,var(--color-primary))}
+.crayon-chip[aria-pressed=true]::before,.crayon-chip[aria-selected=true]::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background:color-mix(in oklab,var(--crayon,var(--color-primary)) 22%,transparent);filter:url(#crayon)}
 .crayon-chip-sm{height:30px;padding:0 10px;gap:5px;border-radius:8px;font-size:12.5px}
 .crayon-chip-sm>svg{width:13px;height:13px}
 .crayon-chip-struck[aria-pressed=false]{color:var(--color-ink-4)}
