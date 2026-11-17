@@ -1,3 +1,4 @@
+import type React from "react";
 import type { CSSProperties, ElementType, ReactNode } from "react";
 
 /* 고르기 — 메뉴 · 세로 탭. 고른 칸은 그 색을 옅게 칠한 크레파스 면(.crayon-pick) + 진한 글자.
@@ -96,5 +97,44 @@ export function CrayonSideTabs<T extends string>({
         );
       })}
     </div>
+  );
+}
+
+/**
+ * 고르는 칩 — 아이콘 · 이름. on이면 그 색(color)을 칠한 크레파스 면 + 진한 글자, 아이콘도 그 색. 아니면 얇은 테두리만.
+ * 하나 고르기(카테고리 · 계좌)와 여럿 켜고 끄기(항목 목록) 모두. 켤 때 굵기가 그대로라 폭이 흔들리지 않는다.
+ * struck: 꺼진 칩에 취소선(켜고 끄는 목록에서 '뺐다'). 아이콘은 색을 직접 주지 말 것 — 칩이 칠한다. size sm = 한 줄에 많이
+ */
+export function CrayonChip({
+  on,
+  color,
+  icon,
+  size = "md",
+  struck,
+  className,
+  style,
+  children,
+  ...rest
+}: {
+  on?: boolean;
+  color?: string;
+  icon?: ReactNode;
+  size?: "sm" | "md";
+  struck?: boolean;
+  className?: string;
+  style?: CSSProperties;
+  children: ReactNode;
+} & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "children" | "style" | "className">) {
+  return (
+    <button
+      type="button"
+      {...rest}
+      aria-pressed={!!on}
+      className={["crayon-chip", size === "sm" && "crayon-chip-sm", struck && "crayon-chip-struck", className].filter(Boolean).join(" ")}
+      style={{ ...tint(color), ...style }}
+    >
+      {icon}
+      <span className="crayon-chip-label">{children}</span>
+    </button>
   );
 }

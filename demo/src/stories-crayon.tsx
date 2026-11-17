@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
-import { CalendarDays, Home, PiggyBank, Settings } from "lucide-react";
-import { CrayonBar, CrayonCalendar, CrayonCheck, CrayonCircle, CrayonColumns, CrayonFrame, CrayonNavItem, CrayonPen, CrayonSideTabs, CrayonSteps, CrayonTooltip, CrayonWash } from "bongchil-design-system/crayon";
+import { Bike, CalendarDays, Coffee, Home, PiggyBank, Settings, ShoppingBag, UtensilsCrossed } from "lucide-react";
+import { CrayonBar, CrayonCalendar, CrayonCheck, CrayonChip, CrayonCircle, CrayonColumns, CrayonFrame, CrayonNavItem, CrayonPen, CrayonSideTabs, CrayonSteps, CrayonTooltip, CrayonWash } from "bongchil-design-system/crayon";
 import { type Story } from "./controls";
 
 /* 크레용 타입 스토리 — 기존 스토리와 섞지 않고 네비의 "크레용" 쪽에만 뜬다 */
@@ -39,6 +39,25 @@ function SideTabsDemo({ color }: { color?: string }) {
           { key: "save", label: "모을 돈", color: "var(--color-comment-mint-solid)", count: "4곳", sub: "62% 모음", ratio: 0.62 },
         ]}
       />
+    </div>
+  );
+}
+
+/** 고르는 칩 — 위: 하나 고르기, 아래: 여럿 켜고 끄기(꺼진 칩 취소선) */
+const CHIPS = [
+  { k: "food", label: "식비", icon: <UtensilsCrossed />, color: "#E07A5F" },
+  { k: "shop", label: "쇼핑", icon: <ShoppingBag />, color: "#A78DC4" },
+  { k: "home", label: "생활", icon: <Home />, color: "#5EAD8C" },
+  { k: "cafe", label: "카페", icon: <Coffee />, color: "#B5652E" },
+  { k: "bike", label: "자전거", icon: <Bike />, color: "#6B9FC4" },
+];
+function ChipDemo({ size }: { size: "sm" | "md" }) {
+  const [one, setOne] = useState("food");
+  const [off, setOff] = useState<string[]>(["cafe"]);
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap gap-1.5">{CHIPS.map((c) => <CrayonChip key={c.k} size={size} on={one === c.k} color={c.color} icon={c.icon} onClick={() => setOne(c.k)}>{c.label}</CrayonChip>)}</div>
+      <div className="flex flex-wrap gap-1.5">{CHIPS.map((c) => <CrayonChip key={c.k} size={size} struck on={!off.includes(c.k)} color={c.color} icon={c.icon} onClick={() => setOff((o) => (o.includes(c.k) ? o.filter((x) => x !== c.k) : [...o, c.k]))}>{c.label}</CrayonChip>)}</div>
     </div>
   );
 }
@@ -434,6 +453,16 @@ export const CRAYON_STORIES: Story[] = [
     code: () => `<span className="relative">밑줄<CrayonPen kind="underline" /></span>\n<span className="relative">끝난 일<CrayonPen kind="strike" /></span>`,
   },
 
+  {
+    id: "crayon-chip",
+    group: "컨트롤",
+    name: "CrayonChip (고르는 칩)",
+    fresh: true,
+    notes: ["아이콘 · 이름 — 고르면 그 색(color) 크레파스 면 + 진한 글자, 아이콘도 그 색. 아니면 얇은 테두리", "하나 고르기(카테고리 · 계좌)와 여럿 켜고 끄기 모두 — struck면 꺼진 칩에 취소선", "켤 때 굵기가 그대로라 폭이 안 흔들림. 모서리 10px(sm 8px)", "아이콘에 색을 직접 주지 말 것 — 칩이 칠함 · aria-pressed"],
+    controls: [{ key: "size", type: "select", options: [{ value: "md", label: "md" }, { value: "sm", label: "sm" }] }],
+    render: (p) => <ChipDemo size={(p.size as "sm" | "md") ?? "md"} />,
+    code: () => `<CrayonChip on={picked === c.id} color={c.color} icon={<CategoryIcon categoryKey={c.icon} />} onClick={() => pick(c.id)}>\n  {c.name}\n</CrayonChip>\n<CrayonChip struck on={!off.includes(c.id)} …>`,
+  },
   {
     id: "crayon-side-tabs",
     group: "레이아웃",

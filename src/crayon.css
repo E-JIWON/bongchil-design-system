@@ -117,3 +117,17 @@
 .crayon-tip:hover>.crayon-tip-label,.crayon-tip:has(:focus-visible)>.crayon-tip-label{opacity:1;translate:-50% 0;transition-delay:.25s}
 
 @media (prefers-reduced-motion:reduce){.crayon-tip-label{transition:opacity .15s}.crayon-wash::before{animation:none}.crayon-bar>.crayon-fill{transition:none}.crayon-draw{animation:none}}
+/* 고르는 칩 — 테두리만 → 고르면 그 색 크레파스 면(#crayon 결). 굵기는 늘 같게(폭 흔들림 없음) */
+.crayon-chip{position:relative;isolation:isolate;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border:1px solid var(--color-border);border-radius:10px;background:none;font:inherit;font-size:13px;font-weight:600;line-height:1;color:var(--color-ink-2);white-space:nowrap;cursor:pointer;user-select:none;transition:color .15s,border-color .15s,transform .12s}
+.crayon-chip>svg{flex:none;width:14px;height:14px;color:var(--color-ink-4);transition:color .15s}
+.crayon-chip-label{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.crayon-chip:hover{border-color:var(--color-border-strong);color:var(--color-ink)}
+.crayon-chip:active{transform:scale(.97)}
+.crayon-chip:focus-visible{outline:2px solid color-mix(in oklab,var(--crayon,var(--color-primary)) 50%,transparent);outline-offset:1px}
+.crayon-chip[aria-pressed=true]{border-color:transparent;color:var(--color-ink)}
+.crayon-chip[aria-pressed=true]>svg{color:var(--crayon,var(--color-primary))}
+.crayon-chip[aria-pressed=true]::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background:color-mix(in oklab,var(--crayon,var(--color-primary)) 22%,transparent);filter:url(#crayon)}
+.crayon-chip-sm{height:30px;padding:0 10px;gap:5px;border-radius:8px;font-size:12.5px}
+.crayon-chip-sm>svg{width:13px;height:13px}
+.crayon-chip-struck[aria-pressed=false]{color:var(--color-ink-4);text-decoration:line-through;text-decoration-color:color-mix(in oklab,var(--color-ink-4) 50%,transparent)}
+@media (prefers-reduced-motion:reduce){.crayon-chip{transition:none}}
