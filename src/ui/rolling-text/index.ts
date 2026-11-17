@@ -1,1 +1,1 @@
-export { TextScramble, NumberRoll } from "./RollingText";
+export { TextScramble, NumberRoll, IconRoll } from "./RollingText";

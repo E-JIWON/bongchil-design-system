@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 /* 글자 · 숫자가 '새로 쓰이는' 움직임 — 바뀐 값을 눈에 띄게 할 때.
    TextScramble: 글자가 섞였다가 왼쪽부터 제자리로 (붙을 때마다)
    NumberRoll: 값이 바뀔 때만 자리마다 굴러감 (처음엔 그냥 숫자)
+   IconRoll: 아이콘이 바뀔 때만 슬롯 한 칸처럼 굴러 들어옴 (처음엔 그냥 아이콘)
    동작 줄이기면 둘 다 그냥 글자 */
 
 const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -148,6 +149,35 @@ export function NumberRoll({
           return <Digit key={`d${p}`} d={Number(c)} delay={delay + (p - 1) * 20} enter={mounted.current} />;
         })}
       </span>
+    </span>
+  );
+}
+
+/**
+ * 아이콘 굴림(슬롯머신 한 칸) — k가 바뀔 때마다 새 아이콘이 아래에서 올라와 살짝 넘쳤다 멈춘다.
+ * 이름을 쓰는 대로 아이콘을 저절로 골라 줄 때(suggestIcons) — '골라 줬다'는 게 눈에 보이게. 처음 그릴 땐 그냥 아이콘.
+ * 감싼 칸이 창(overflow hidden) 노릇이라 크기는 className · style로 (안 주면 아이콘 크기). 원래 봉칠일기 icon-roulette
+ */
+export function IconRoll({ k, children, className, style }: { k: string; children: ReactNode; className?: string; style?: CSSProperties }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    const el = ref.current;
+    if (!el || reduced()) return;
+    el.animate(
+      [
+        { transform: "translateY(100%)", opacity: 0 },
+        { transform: "translateY(-8%)", opacity: 1, offset: 0.5 },
+        { transform: "translateY(3%)", offset: 0.75 },
+        { transform: "none", opacity: 1 },
+      ],
+      { duration: 350, easing: "cubic-bezier(.34,1.56,.64,1)" },
+    );
+  }, [k]);
+  return (
+    <span className={className} style={{ display: "inline-grid", placeItems: "center", overflow: "hidden", flexShrink: 0, ...style }}>
+      <span ref={ref} style={{ display: "grid", placeItems: "center" }}>{children}</span>
     </span>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NumberRoll, Sheet, TextScramble } from "bongchil-design-system";
+import { CategoryIcon, IconRoll, NumberRoll, Sheet, TextScramble, suggestIcons } from "bongchil-design-system";
 import { AlignCenter, AlignLeft, AlignRight, Inbox, LayoutGrid, Sparkles, StickyNote } from "lucide-react";
 import {
   BottomSheet,
@@ -340,6 +340,19 @@ export const MORE_STORIES: Story[] = [
     code: () => `<NumberRoll value={total} />\n<NumberRoll value={won} format={(v) => \`\${v.toLocaleString()}원\`} />`,
   },
   {
+    id: "icon-roll",
+    group: "모션",
+    name: "IconRoll (아이콘 굴림)",
+    fresh: true,
+    notes: [
+      "k가 바뀔 때만 새 아이콘이 아래에서 올라와 살짝 넘쳤다 멈춤(슬롯 한 칸) — 처음엔 그냥 아이콘",
+      "이름을 쓰는 대로 아이콘을 골라 줄 때(suggestIcons) — 골라 줬다는 게 보이게",
+      "감싼 칸이 창(overflow hidden) — 크기는 className으로. 동작 줄이기면 그냥 바뀜",
+    ],
+    render: () => <IconRollDemo />,
+    code: () => `<IconRoll k={icon} className="size-8">\n  <CategoryIcon categoryKey={icon} size={16} />\n</IconRoll>`,
+  },
+  {
     id: "text-scramble",
     group: "모션",
     name: "TextScramble (글자 섞임)",
@@ -561,6 +574,19 @@ function RollDemo() {
         <Button variant="grain" size="xs" onClick={() => setV((x) => x + 1000)}>+1,000</Button>
         <Button variant="grain" size="xs" onClick={() => setV((x) => Math.max(0, x - 1000))}>−1,000</Button>
       </div>
+    </div>
+  );
+}
+
+function IconRollDemo() {
+  const [name, setName] = useState("커피");
+  const icon = suggestIcons(name)[0] ?? "package";
+  return (
+    <div className="flex items-center gap-2.5">
+      <IconRoll k={icon} className="size-9 rounded-[9px] bg-ink/[0.05] text-ink-2">
+        <CategoryIcon categoryKey={icon} size={18} strokeWidth={1.8} />
+      </IconRoll>
+      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="자전거, 월세, 여행…" className="h-9 w-44 rounded-[8px] border border-border px-3 text-[13px]" />
     </div>
   );
 }
