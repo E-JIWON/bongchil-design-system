@@ -124,6 +124,28 @@ export function CrayonSteps({
 }
 
 /**
+ * 스테퍼 — 손그림 칸을 선으로 이은 한 줄. 지나온 칸은 칠 + 체크(onPick이 있으면 눌러서 그 단계로), 지금 칸은 굵은 테두리, 남은 칸은 옅은 빗금.
+ * 사이 선은 지나온 만큼 크레파스 실선, 남은 구간은 점선. at = 지금 단계(0부터, 다 끝났으면 steps.length)
+ */
+export function CrayonStepper({ steps, at, onPick, color = BASE, size = 14, seed = "" }: { steps: string[]; at: number; onPick?: (i: number) => void; color?: string; size?: number; seed?: string }) {
+  return (
+    <ol aria-label="단계" style={{ display: "flex", alignItems: "center", margin: 0, padding: 0, listStyle: "none" }}>
+      {steps.map((label, i) => (
+        <li key={label} style={{ display: "flex", alignItems: "center", flex: i > 0 ? 1 : undefined }}>
+          {i > 0 && (i <= at
+            ? <span aria-hidden style={{ flex: 1, height: 2, margin: "0 4px", borderRadius: 2, background: color, opacity: 0.7, filter: "url(#crayon)" }} />
+            : <span aria-hidden style={{ flex: 1, margin: "0 4px", borderTop: "1.5px dashed color-mix(in oklab, var(--color-ink-4) 40%, transparent)" }} />)}
+          <button type="button" disabled={i >= at || !onPick} onClick={() => onPick?.(i)} aria-label={label} aria-current={i === at ? "step" : undefined}
+            style={{ display: "grid", placeItems: "center", width: size + 2, height: size + 2, padding: 0, border: 0, background: "none", cursor: i < at && onPick ? "pointer" : "default" }}>
+            <CrayonCheck on={i < at} next={i === at} color={i > at ? "var(--color-ink-4)" : color} size={size} seed={`${seed}${i}`} />
+          </button>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/**
  * 기둥 줄 — 값마다 높이, 0은 바닥 선. 진하게 칠할 건 마지막 칸(기본) 또는 가장 큰 칸(peak), 나머지는 옅게.
  * live면 마지막 칸이 아직 진행 중이라 빗금. 높이는 h(px), 칸 이름은 titles(올리면 보임).
  */

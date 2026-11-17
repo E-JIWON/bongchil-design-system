@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
 import { Bike, CalendarDays, Coffee, Home, PiggyBank, Settings, ShoppingBag, UtensilsCrossed } from "lucide-react";
-import { CrayonBar, CrayonCalendar, CrayonCheck, CrayonChip, CrayonCircle, CrayonColumns, CrayonFrame, CrayonNavItem, CrayonPen, CrayonSideTabs, CrayonSteps, CrayonTooltip, CrayonWash } from "bongchil-design-system/crayon";
+import { CrayonBar, CrayonCalendar, CrayonCheck, CrayonChip, CrayonCircle, CrayonColumns, CrayonFrame, CrayonNavItem, CrayonPen, CrayonSideTabs, CrayonStepper, CrayonSteps, CrayonTooltip, CrayonWash } from "bongchil-design-system/crayon";
 import { type Story } from "./controls";
 
 /* 크레용 타입 스토리 — 기존 스토리와 섞지 않고 네비의 "크레용" 쪽에만 뜬다 */
@@ -453,6 +453,16 @@ export const CRAYON_STORIES: Story[] = [
     code: () => `<span className="relative">밑줄<CrayonPen kind="underline" /></span>\n<span className="relative">끝난 일<CrayonPen kind="strike" /></span>`,
   },
 
+  {
+    id: "crayon-stepper",
+    group: "진행",
+    name: "CrayonStepper (스테퍼)",
+    fresh: true,
+    notes: ["손그림 칸을 선으로 이은 한 줄 — 지나온 칸은 칠 + 체크, 지금 칸은 굵은 테두리, 남은 칸은 옅은 빗금", "사이 선은 지나온 만큼 크레파스 실선, 남은 구간은 점선", "onPick을 주면 지나온 칸을 눌러 그 단계로"],
+    controls: [{ key: "at", type: "select", options: [0, 1, 2, 3, 4].map((v) => ({ value: v, label: String(v) })) }],
+    render: (p) => <div className="w-[240px]"><CrayonStepper steps={["종류", "어디", "결제일", "혜택"]} at={(p.at as number) ?? 2} onPick={() => {}} /></div>,
+    code: () => `<CrayonStepper steps={["종류", "어디", "결제일", "혜택"]} at={2} onPick={(i) => open(i)} />`,
+  },
   {
     id: "crayon-chip",
     group: "컨트롤",
