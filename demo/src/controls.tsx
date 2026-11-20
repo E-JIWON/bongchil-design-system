@@ -15,6 +15,8 @@ export type Story = {
   group: string;
   name: string;
   notes?: string[];
+  /** 같이 볼 스토리 — 제목 아래 링크로 */
+  see?: { id: string; label: string }[];
   controls?: Control[];
   /** 손잡이 초기값 */
   initial?: Props;
@@ -76,9 +78,8 @@ export function ControlsPanel({
               {c.options.map((o) => (
                 <Button
                   key={o.label}
-                  variant="grain"
                   size="xs"
-                  active={value[c.key] === o.value}
+                  on={value[c.key] === o.value}
                   onClick={() => set(c.key, o.value)}
                 >
                   {o.label}
@@ -88,9 +89,8 @@ export function ControlsPanel({
           )}
           {c.type === "bool" && (
             <Button
-              variant="grain"
               size="xs"
-              active={Boolean(value[c.key])}
+              on={Boolean(value[c.key])}
               onClick={() => set(c.key, !value[c.key])}
             >
               {value[c.key] ? "true" : "false"}

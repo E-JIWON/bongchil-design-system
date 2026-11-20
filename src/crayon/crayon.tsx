@@ -36,6 +36,14 @@ export function CrayonDefs() {
         <feColorMatrix in="t" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2 0 0 0 1.85" result="tooth" />
         <feComposite in="d" in2="tooth" operator="in" />
       </filter>
+      {/* 손으로 그은 가는 획(칩 동그라미 line="loop"): 살짝 흔들고 이 빠진 자국 */}
+      <filter id="crayon-stroke" x="-5%" y="-10%" width="110%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="1" seed="3" result="w" />
+        <feDisplacementMap in="SourceGraphic" in2="w" scale="1.6" xChannelSelector="R" yChannelSelector="G" result="d" />
+        <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="9" result="n" />
+        <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2.4 0 0 0 1.9" result="tooth" />
+        <feComposite in="d" in2="tooth" operator="in" />
+      </filter>
       <filter id="graphite" x="-10%" y="-60%" width="120%" height="220%">
         <feTurbulence type="fractalNoise" baseFrequency="0.4" numOctaves="1" seed="8" result="w" />
         <feDisplacementMap in="SourceGraphic" in2="w" scale="1.2" result="d" />

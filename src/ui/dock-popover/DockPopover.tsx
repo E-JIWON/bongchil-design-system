@@ -25,8 +25,7 @@ export function DockPopover({ children }: { children: ReactNode }) {
 /** 독 팝오버 공용 초기화 — 각 팝오버가 자기 자리(검색줄·월 네비 우측 등)에 놓는다 */
 export function DockReset({ onClick }: { onClick: () => void }) {
   return (
-    <Button
-      variant="text"
+    <Button fill={false}
       size="sm"
       onClick={onClick}
       className="shrink-0"

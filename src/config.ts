@@ -18,6 +18,12 @@ export type Config = {
   proxySrc: (src: string) => string;
   /** 주인장 표시 이름 — 방문자가 같은 이름을 못 쓰게 막는다. 기본은 빈 값(검사 안 함) */
   ownerName: () => string;
+  /**
+   * 앱 전체 겉모습 — 버튼 · 고르는 칩 · 토글 · 가려주는 유리가 따라간다. 기본 crayon(0.3~).
+   * crayon은 crayon.css + `<CrayonDefs />`가 필요하다. 예전 그레인 결을 쓰는 앱은 `configure({ look: "grain" })`.
+   * ⚠️ Next RSC에선 서버 · 브라우저 모듈 사본이 따로라, grain으로 바꾸는 configure는 둘 다에서 돌게 둘 것
+   */
+  look: "grain" | "crayon";
 };
 
 const config: Config = {
@@ -27,6 +33,7 @@ const config: Config = {
   },
   proxySrc: (src) => src,
   ownerName: () => "",
+  look: "crayon",
 };
 
 /** 앱 진입점에서 한 번 — 넘긴 항목만 덮어쓴다 */

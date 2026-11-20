@@ -35,10 +35,9 @@ type Props = {
 function ActionButton({ action, small }: { action: Action; small: boolean }) {
   const ActionIcon = action.icon;
   return (
-    <Button
-      variant="text"
+    <Button fill={false}
       size={small ? "sm" : "md"}
-      tone={action.variant === "primary" ? "primary" : "default"}
+      color={action.variant === "primary" ? "var(--color-primary)" : undefined}
       href={action.href}
       onClick={action.onClick}
       icon={ActionIcon ? <ActionIcon size={small ? 13 : 14} strokeWidth={1.8} /> : undefined}

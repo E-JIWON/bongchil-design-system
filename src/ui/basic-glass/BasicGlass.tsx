@@ -1,5 +1,6 @@
 import { forwardRef, type ComponentPropsWithoutRef, type CSSProperties, type Ref } from "react";
 import { Link } from "../../config";
+import { resolveLook, type Look } from "../grain";
 
 /**
  * 베이직 글라스 — 반투명 프로스트 서피스(가독성 우선). 리퀴드 글라스와 짝을 이루는 2단계 글라스.
@@ -35,24 +36,36 @@ type BasicGlassProps = ComponentPropsWithoutRef<"button"> & {
    * 뒤에 가릴 게 없는 자리에만 — 팝오버·드롭다운은 그대로 84%/94%를 쓴다.
    */
   airy?: boolean;
+  /**
+   * 모양 — `crayon`이면 유리 대신 불투명 종이(고운 결 + 연한 보더 + 옅은 그림자). blur 없음.
+   * 보통 = 따뜻한 종이, opaque = 흰 종이(목록을 읽는 표면), airy = 그림자 없는 종이. crayon.css 필요
+   */
+  look?: Look;
 };
 
 export const BasicGlass = forwardRef<HTMLDivElement, BasicGlassProps>(function BasicGlass(
-  { as = "div", href, opaque = false, airy = false, children, className = "", style, ...rest },
+  { as = "div", href, opaque = false, airy = false, look, children, className = "", style, ...rest },
   ref,
 ) {
-  const cls = `glass ${opaque ? "glass-opaque" : ""} ${airy ? "glass-airy" : ""} ${className}`
+  const crayon = resolveLook(look) === "crayon";
+  const cls = (
+    crayon
+      ? `crayon-sheet ${opaque ? "" : "crayon-sheet-warm"} ${airy ? "crayon-sheet-flat" : ""} ${className}`
+      : `glass ${opaque ? "glass-opaque" : ""} ${airy ? "glass-airy" : ""} ${className}`
+  )
     .replace(/\s+/g, " ")
     .trim();
   // 배경(불투명도)은 CSS 클래스가, backdrop-filter는 inline이 담당한다
   // (CSS 파일의 backdrop-filter 값은 이 빌드에서 죽으므로 — CLAUDE.md 규칙)
   const blur = opaque ? "blur(14px) saturate(1.15)" : "blur(5px)";
-  const glassStyle: CSSProperties = {
-    backdropFilter: blur,
-    WebkitBackdropFilter: blur,
-    willChange: "transform",
-    ...style,
-  };
+  const glassStyle: CSSProperties | undefined = crayon
+    ? style
+    : {
+        backdropFilter: blur,
+        WebkitBackdropFilter: blur,
+        willChange: "transform",
+        ...style,
+      };
 
   if (href) {
     return (

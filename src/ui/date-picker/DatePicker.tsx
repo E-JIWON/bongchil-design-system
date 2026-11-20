@@ -283,8 +283,7 @@ export function DatePickerCalendar({
 
       {/* 오늘 */}
       {showToday && (
-        <Button
-          variant="text"
+        <Button fill={false}
           size="sm"
           onClick={() => {
             const t = new Date();

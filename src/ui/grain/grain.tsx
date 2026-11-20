@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { getConfig } from "../../config";
 
 /**
  * 그레인 재질 — 컨트롤(버튼·칩·셀렉트·월 피커)이 공유하는 치수·색 계산.
@@ -13,6 +14,20 @@ import type { CSSProperties } from "react";
  * - `xs` 카드 안에 끼는 보조 아이콘 버튼 · `sm` 카테고리·필터 (기준) · `md` 확인/취소 등 액션 버튼 · `lg` 끄적끄적 상단 필터
  */
 export type ControlSize = "xs" | "sm" | "md" | "lg";
+
+/**
+ * 부품 모양 축 — 재질(variant)과 따로. `default` = 지금 모습, `crayon` = 크레파스 결(crayon.css + `<CrayonDefs />` 필요).
+ * 기본값은 늘 `default`라 안 넘기면 아무것도 안 바뀐다. 앱이 전체를 크레용으로 쓰려면 감싸는 쪽에서 기본값을 준다.
+ */
+/** 겉모습 — grain(색 번짐 + 필름 결) · crayon(크레파스 칠). "default"는 예전 이름(= grain) */
+export type Look = "grain" | "crayon" | "default";
+
+/** prop으로 준 겉모습 → 없으면 앱 설정(configure의 look, 기본 crayon) */
+export function resolveLook(look?: Look): "grain" | "crayon" {
+  if (look === "crayon") return "crayon";
+  if (look === "grain" || look === "default") return "grain";
+  return getConfig().look;
+}
 
 export const CONTROL_SIZES = {
   xs: { h: "h-6", pad: "px-2", text: "text-[10.5px]", icon: 11, gap: "gap-1" },

@@ -3,7 +3,6 @@
 import type { CSSProperties } from "react";
 import { Check } from "lucide-react";
 import type { GuestColor } from "../../lib/guest-identity";
-import { Button } from "../button";
 import { guestMarkSurface } from "./GuestAvatar";
 
 /**
@@ -41,46 +40,28 @@ export function GuestSwatch({
   style?: CSSProperties;
 }) {
   // 마크 색은 CSS가 테마별로 들고 있다 (globals.css `--guest-mark-*`)
-  const deep = `var(--guest-mark-${color})`;
   const surface = guestMarkSurface(color, size);
 
   return (
-    <Button
-      variant="grain"
-      shape="square"
-      size="sm"
-      color={deep}
-      // 시각 상태는 아래 style이 다 정한다 — active는 `aria-pressed`(읽어주는 상태)용으로만 남긴다
-      active={active}
+    // 액자 재질이라 크레파스 버튼이 아니라 맨 버튼 — 겉모습은 guestMarkSurface가 다 정한다
+    <button
+      type="button"
+      aria-pressed={active}
       onClick={onClick}
       title={title}
       aria-label={`${color} 색`}
-      // 고른 칸 — 체크 하나. 마크 색이 진해도 읽히게 그림자를 깐다.
-      // ⚠️ `children`이 아니라 `icon`으로 준다 — shape="square"는 아이콘 전용이라 children을 버린다.
-      // 크기는 칸에 비례(45%)해서 16px 칸에서도 액자 링을 안 넘는다
-      icon={
-        active ? (
-          <Check
-            size={Math.max(9, Math.round(size * 0.45))}
-            strokeWidth={3}
-            aria-hidden
-            className="pointer-events-none text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]"
-          />
-        ) : undefined
-      }
-      className={className}
-      // 치수는 인라인으로 못 박는다 — Tailwind v4는 `!size-*` 접두사 형태를 안 받아
-      // 버튼 스케일(sm=28px)이 그대로 남는다
-      style={{
-        // 재질 고정 — 버튼이 상태별로 다시 섞지 못하게 여기서 덮는다 (styleProp이 마지막에 병합된다)
-        ...surface,
-        // 버튼이 깔아둔 필름 노이즈를 끈다 — 액자 재질엔 노이즈가 없다
-        "--grain-opacity": 0,
-        width: size,
-        height: size,
-        flexShrink: 0,
-        ...style,
-      } as CSSProperties}
-    />
+      className={`press-effect grid place-items-center rounded-m ${className ?? ""}`}
+      style={{ ...surface, width: size, height: size, flexShrink: 0, ...style } as CSSProperties}
+    >
+      {/* 고른 칸 — 체크 하나. 마크 색이 진해도 읽히게 그림자를 깐다. 크기는 칸에 비례(45%) */}
+      {active && (
+        <Check
+          size={Math.max(9, Math.round(size * 0.45))}
+          strokeWidth={3}
+          aria-hidden
+          className="pointer-events-none text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]"
+        />
+      )}
+    </button>
   );
 }

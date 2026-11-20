@@ -85,11 +85,7 @@ function NavArrow({
   return (
     // 도형은 앱의 둥근 사각(서랍 관리 액션과 같은 결) — square는 hoverActive + 아이콘 모션이 규칙
     <Button
-      variant="grain"
-      shape="square"
-      tone="primary"
       color={color}
-      hoverActive
       onClick={onClick}
       aria-label={label}
       /* ⚠️ 반지름은 인라인으로 준다 — Button square의 `--radius-m`(10px)은 이 크기(16~22px)에선

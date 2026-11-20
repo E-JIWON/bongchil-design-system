@@ -1,7 +1,8 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { Check, Minus } from "lucide-react";
-import { grainAura, grainText, GrainNoise } from "../grain";
+import { grainAura, grainText, GrainNoise, resolveLook, type Look } from "../grain";
 
 /**
  * 공용 토글 스위치 — **뒤집히는 카드**. on/off를 "미끄러짐"이 아니라 Y축 플립으로 말한다.
@@ -41,6 +42,8 @@ export type ToggleProps = {
   size?: ToggleSize;
   /** on 상태 색 — CSS 색 문자열. 기본 포인트 색 */
   color?: string;
+  /** 모양 — `crayon`이면 앞면은 크레파스 칠, 뒷면은 성긴 빗금 (crayon.css + `<CrayonDefs />` 필요) */
+  look?: Look;
   className?: string;
 };
 
@@ -50,9 +53,11 @@ export function Toggle({
   label,
   size = "md",
   color = "var(--color-primary)",
+  look,
   className = "",
 }: ToggleProps) {
   const s = TOGGLE_SIZES[size];
+  const crayon = resolveLook(look) === "crayon";
   const readOnly = !onChange;
 
   /* 면(face)에는 overflow-hidden을 줘도 안전하다 — preserve-3d는 부모에만 걸려 있다 */
@@ -66,35 +71,54 @@ export function Toggle({
       style={{ transform: `rotateY(${checked ? 0 : 180}deg)` }}
     >
       {/* 앞면 = on — 칩 active와 같은 그레인 오라 + 찍힌 체크 */}
-      <span
-        className={face}
-        style={{
-          ...grainAura(color, true),
-          color: grainText(color, true),
-          borderRadius: s.radius,
-        }}
-      >
-        <GrainNoise />
-        <Check size={s.icon} strokeWidth={s.stroke} className="relative" />
-      </span>
+      {crayon ? (
+        // 칠은 면의 ::before에만 — 카드(preserve-3d)에 필터를 걸면 플립이 납작해진다
+        <span
+          className={`${face} crayon-toggle-on`}
+          style={{ "--crayon": color, color: "var(--aura-tint, #ffffff)", borderRadius: s.radius } as CSSProperties}
+        >
+          <Check size={s.icon} strokeWidth={s.stroke} />
+        </span>
+      ) : (
+        <span
+          className={face}
+          style={{
+            ...grainAura(color, true),
+            color: grainText(color, true),
+            borderRadius: s.radius,
+          }}
+        >
+          <GrainNoise />
+          <Check size={s.icon} strokeWidth={s.stroke} className="relative" />
+        </span>
+      )}
       {/* 뒷면 = off — 눌린 홈. 3D에서 뒤집어 붙인다 */}
-      <span
-        className={`${face} text-ink-4`}
-        style={{
-          transform: "rotateY(180deg)",
-          borderRadius: s.radius,
-          background: "var(--color-surface-subtle)",
-          boxShadow: "inset 0 1px 2px color-mix(in srgb, var(--color-ink) 9%, transparent)",
-          outline: "1px solid var(--color-border-strong)",
-          outlineOffset: "-1px",
-        }}
-      >
-        <Minus size={s.icon} strokeWidth={s.stroke} />
-      </span>
+      {crayon ? (
+        <span
+          className={`${face} crayon-toggle-off text-ink-3`}
+          style={{ transform: "rotateY(180deg)", borderRadius: s.radius, "--crayon": color } as CSSProperties}
+        >
+          <Minus size={s.icon} strokeWidth={s.stroke} />
+        </span>
+      ) : (
+        <span
+          className={`${face} text-ink-4`}
+          style={{
+            transform: "rotateY(180deg)",
+            borderRadius: s.radius,
+            background: "var(--color-surface-subtle)",
+            boxShadow: "inset 0 1px 2px color-mix(in srgb, var(--color-ink) 9%, transparent)",
+            outline: "1px solid var(--color-border-strong)",
+            outlineOffset: "-1px",
+          }}
+        >
+          <Minus size={s.icon} strokeWidth={s.stroke} />
+        </span>
+      )}
     </span>
   );
 
-  const cls = `relative shrink-0 [perspective:400px] ${s.box} ${readOnly ? "" : "press-effect"} ${className}`;
+  const cls = `relative shrink-0 [perspective:400px] ${s.box} ${readOnly ? "" : crayon ? "crayon-lift" : "press-effect"} ${className}`;
 
   if (readOnly) {
     return (

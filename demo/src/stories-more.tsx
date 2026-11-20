@@ -423,13 +423,13 @@ function BottomSheetDemo() {
   };
   return (
     <>
-      <Button variant="grain" onClick={() => setSheet("open")}>시트 열기</Button>
+      <Button onClick={() => setSheet("open")}>시트 열기</Button>
       {sheet !== "closed" && (
         <BottomSheet closing={sheet === "closing"} onClose={close}>
           <div className="space-y-3 px-6 pb-8 pt-2">
             <p className="text-sm font-semibold text-ink">바텀 시트</p>
             <p className="text-xs text-ink-4">배경을 누르거나 버튼으로 닫아요.</p>
-            <Button variant="text" onClick={close}>닫기</Button>
+            <Button fill={false} onClick={close}>닫기</Button>
           </div>
         </BottomSheet>
       )}
@@ -450,7 +450,7 @@ function DockPopoverDemo() {
           <p className="mt-2 text-[12px] text-ink-4">독 버튼 위로 떠오른 팝오버</p>
         </DockPopover>
       )}
-      <Button variant="grain" active={open} onClick={() => setOpen((o) => !o)}>독 버튼</Button>
+      <Button on={open} onClick={() => setOpen((o) => !o)}>독 버튼</Button>
     </div>
   );
 }
@@ -570,9 +570,9 @@ function RollDemo() {
         <NumberRoll value={v} format={(n) => `${n.toLocaleString()}원`} />
       </span>
       <div className="flex gap-1.5">
-        <Button variant="grain" size="xs" onClick={() => setV((x) => x + 13)}>+13</Button>
-        <Button variant="grain" size="xs" onClick={() => setV((x) => x + 1000)}>+1,000</Button>
-        <Button variant="grain" size="xs" onClick={() => setV((x) => Math.max(0, x - 1000))}>−1,000</Button>
+        <Button size="xs" onClick={() => setV((x) => x + 13)}>+13</Button>
+        <Button size="xs" onClick={() => setV((x) => x + 1000)}>+1,000</Button>
+        <Button size="xs" onClick={() => setV((x) => Math.max(0, x - 1000))}>−1,000</Button>
       </div>
     </div>
   );
@@ -599,7 +599,7 @@ function ScrambleDemo() {
       <span className="text-[17px] font-bold text-ink-2">
         <TextScramble key={i}>{SCRAMBLE[i % SCRAMBLE.length]}</TextScramble>
       </span>
-      <Button variant="grain" size="xs" onClick={() => setI((x) => x + 1)}>다음 줄</Button>
+      <Button size="xs" onClick={() => setI((x) => x + 1)}>다음 줄</Button>
     </div>
   );
 }
@@ -608,13 +608,13 @@ function SheetDemo({ center, wide }: { center: boolean; wide: boolean }) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button variant="grain" size="sm" onClick={() => setOpen(true)}>시트 열기</Button>
+      <Button size="sm" onClick={() => setOpen(true)}>시트 열기</Button>
       <Sheet open={open} onClose={() => setOpen(false)} title="오늘 상태 2/6" labelledBy="sheet-demo-q" center={center} wide={wide}>
         <h3 id="sheet-demo-q" className="mt-3 text-[22px] font-extrabold tracking-tight text-ink">몸은 어때요?</h3>
         <p className="mt-1.5 text-[13px] text-ink-3">Esc, 바깥 누르기, 닫기 버튼 — 셋 다 나가는 움직임 뒤에 닫혀요.</p>
         <div className="mt-5 flex gap-2">
-          <Button variant="grain" size="sm" onClick={() => setOpen(false)}>나중에</Button>
-          <Button variant="grain" size="sm" active onClick={() => setOpen(false)}>좋아요</Button>
+          <Button size="sm" onClick={() => setOpen(false)}>나중에</Button>
+          <Button size="sm" on onClick={() => setOpen(false)}>좋아요</Button>
         </div>
       </Sheet>
     </>

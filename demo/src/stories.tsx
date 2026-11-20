@@ -1,4 +1,4 @@
-import { createElement, useState } from "react";
+import { useState } from "react";
 import {
   Bookmark,
   BookOpen,
@@ -12,29 +12,7 @@ import {
   Trash2,
   type LucideIcon,
 } from "lucide-react";
-import {
-  BasicGlass,
-  Button,
-  IconButton,
-  ImageEditor,
-  EmbedCard,
-  NavTabs,
-  Toggle,
-  useModal,
-  CATEGORY_ICONS,
-  CategoryChip,
-  CategoryIcon,
-  CategoryPill,
-  CategorySelect,
-  EmptyState,
-  LiquidGlass,
-  PageTitle,
-  TodoCheckbox,
-  useToast,
-  ToastProvider,
-  type CategoryColor,
-  type CategoryOption,
-} from "bongchil-design-system";
+import { BasicGlass, Button, ImageEditor, EmbedCard, NavTabs, Toggle, useModal, CATEGORY_ICONS, CategoryChip, CategoryIcon, CategorySelect, EmptyState, LiquidGlass, PageTitle, TodoCheckbox, useToast, ToastProvider, type CategoryColor, type CategoryOption } from "bongchil-design-system";
 import { opts, snippet, type Story } from "./controls";
 
 /* ── 데모 데이터 ── */
@@ -162,45 +140,41 @@ export const STORIES: Story[] = [
     id: "button",
     group: "컨트롤",
     name: "Button",
+    see: [{ id: "crayon-chip", label: "고르는 칩 줄 예시" }, { id: "filter-chips", label: "FilterChips" }],
     notes: [
-      "새로 만들면 variant='grain'",
-      "유리는 아이콘 하나만 — 라벨 금지",
-      "tone은 위계, active는 상태",
+      "실행하는 버튼과 고르는 칩이 한 몸 — 크레파스 칠, 테두리 없음",
+      "fill(기본 true) = 평소 옅게 칠 · false = 이름만 / on = 고른 상태(칠한 버튼은 동그라미, 아니면 진한 칠)",
+      "색은 color 하나(주요 = primary · 삭제 = danger) / add = 직접 적기 점선 / still = 보여 주기 / struck = 아이콘까지 취소선",
+      "이름이 없으면 아이콘만 정사각 — tooltip으로 이름표(겸 aria-label)",
     ],
     controls: [
-      { key: "variant", type: "select", options: opts("grain", "text", "dotted", "plain", "glass") },
-      { key: "shape", type: "select", options: opts("pill", "square", "round") },
       { key: "size", type: "select", options: opts("xs", "sm", "md", "lg") },
-      { key: "tone", type: "select", options: opts("default", "muted", "primary", "danger") },
       { key: "color", type: "select", options: COLORS },
       { key: "icon", type: "select", options: iconOpts },
       { key: "children", type: "text" },
-      { key: "active", type: "bool" },
-      { key: "hoverActive", type: "bool" },
+      { key: "tooltip", type: "text" },
+      { key: "fill", type: "bool" },
+      { key: "on", type: "bool" },
+      { key: "add", type: "bool" },
+      { key: "still", type: "bool" },
+      { key: "struck", type: "bool" },
       { key: "disabled", type: "bool" },
       { key: "count", type: "number", min: 0, max: 99 },
     ],
-    initial: {
-      variant: "grain",
-      shape: "pill",
-      size: "md",
-      tone: "default",
-      icon: "Plus",
-      children: "기록",
-      count: 0,
-    },
+    initial: { size: "md", icon: "Plus", children: "기록", tooltip: "", fill: true, count: 0 },
     render: (p) => {
-      const iconOnly = p.shape === "round" || p.shape === "square";
+      const iconOnly = !p.children;
       return (
         <Button
-          variant={p.variant as never}
-          shape={p.shape as never}
           size={p.size as never}
-          tone={p.tone as never}
           color={p.color as string | undefined}
+          tooltip={p.tooltip ? String(p.tooltip) : undefined}
           icon={p.icon ? ICONS[p.icon as string] : undefined}
-          active={Boolean(p.active)}
-          hoverActive={Boolean(p.hoverActive)}
+          fill={Boolean(p.fill)}
+          on={Boolean(p.on)}
+          add={Boolean(p.add)}
+          still={Boolean(p.still)}
+          struck={Boolean(p.struck)}
           disabled={Boolean(p.disabled)}
           count={Number(p.count) || undefined}
           aria-label={iconOnly ? String(p.children || "버튼") : undefined}
@@ -209,22 +183,24 @@ export const STORIES: Story[] = [
         </Button>
       );
     },
-    code: (p) => {
-      const iconOnly = p.shape === "round" || p.shape === "square";
-      const props = {
-        variant: p.variant,
-        shape: p.shape === "pill" ? undefined : p.shape,
-        size: p.size === "md" ? undefined : p.size,
-        tone: p.tone === "default" ? undefined : p.tone,
-        color: p.color,
-        icon: p.icon ? `{${p.icon}}` : undefined,
-        active: p.active,
-        hoverActive: p.hoverActive,
-        disabled: p.disabled,
-        count: Number(p.count) || undefined,
-      };
-      return snippet("Button", props, iconOnly ? undefined : String(p.children ?? ""));
-    },
+    code: (p) =>
+      snippet(
+        "Button",
+        {
+          size: p.size === "md" ? undefined : p.size,
+          color: p.color,
+          tooltip: p.tooltip || undefined,
+          icon: p.icon ? `{${p.icon}}` : undefined,
+          fill: p.fill ? undefined : false,
+          on: p.on || undefined,
+          add: p.add || undefined,
+          still: p.still || undefined,
+          struck: p.struck || undefined,
+          disabled: p.disabled,
+          count: Number(p.count) || undefined,
+        },
+        !p.children ? undefined : String(p.children ?? ""),
+      ),
   },
 
   {
@@ -302,33 +278,6 @@ export const STORIES: Story[] = [
   },
 
   {
-    id: "category-pill",
-    group: "카테고리",
-    name: "CategoryPill",
-    notes: ["서랍장·필터에서 하나를 고르는 알약"],
-    controls: [
-      { key: "label", type: "text" },
-      { key: "count", type: "number", min: 0, max: 99 },
-      { key: "iconKey", type: "select", options: opts("book", "cafe", "walk", "music") },
-      { key: "size", type: "select", options: opts("sm", "md") },
-      { key: "active", type: "bool" },
-      { key: "hex", type: "select", options: [{ value: undefined, label: "(토큰색)" }, { value: "#B47850", label: "#B47850" }] },
-    ],
-    initial: { label: "산책", count: 7, iconKey: "walk", size: "md", active: true },
-    render: (p) => (
-      <CategoryPill
-        label={String(p.label ?? "")}
-        count={Number(p.count) || undefined}
-        iconKey={p.iconKey as string}
-        size={p.size as never}
-        active={Boolean(p.active)}
-        hex={p.hex as string | undefined}
-      />
-    ),
-    code: (p) => snippet("CategoryPill", { label: p.label, count: Number(p.count) || undefined, iconKey: p.iconKey, size: p.size === "md" ? undefined : p.size, active: p.active, hex: p.hex }),
-  },
-
-  {
     id: "category-select",
     group: "카테고리",
     name: "CategorySelect",
@@ -387,7 +336,7 @@ export const STORIES: Story[] = [
           subtitle={p.subtitle ? String(p.subtitle) : undefined}
           action={
             p.action ? (
-              <Button variant="grain" size="sm" icon={Plus}>
+              <Button size="sm" icon={Plus}>
                 기록
               </Button>
             ) : undefined
@@ -467,34 +416,6 @@ export const STORIES: Story[] = [
     initial: { checked: true, size: "md" },
     render: (p) => <ToggleDemo checked={Boolean(p.checked)} size={p.size as never} color={p.color as string | undefined} readOnly={Boolean(p.readOnly)} />,
     code: (p) => snippet("Toggle", { checked: "{on}", onChange: p.readOnly ? undefined : "{setOn}", label: "공개", size: p.size === "md" ? undefined : p.size, color: p.color }),
-  },
-
-  {
-    id: "icon-button",
-    group: "컨트롤",
-    name: "IconButton",
-    notes: ["아이콘만 있는 원형 버튼 + 툴팁(라벨이 툴팁을 대신한다)", "둥근 사각이 필요하면 Button shape='square'"],
-    controls: [
-      { key: "shape", type: "select", options: opts("round", "square") },
-      { key: "size", type: "select", options: opts("xs", "sm", "md", "lg") },
-      { key: "tone", type: "select", options: opts("default", "muted", "primary", "danger") },
-      { key: "icon", type: "select", options: iconOpts.slice(1) },
-      { key: "tooltipSide", type: "select", options: opts("top", "bottom", "left", "right") },
-      { key: "hoverActive", type: "bool" },
-    ],
-    initial: { shape: "round", size: "md", tone: "default", icon: "Search", tooltipSide: "bottom" },
-    render: (p) => (
-      <IconButton
-        label="검색"
-        icon={createElement(ICONS[p.icon as string] ?? Search, { size: 16, strokeWidth: 1.9 })}
-        shape={p.shape as never}
-        size={p.size as never}
-        tone={p.tone as never}
-        tooltipSide={p.tooltipSide as never}
-        hoverActive={Boolean(p.hoverActive)}
-      />
-    ),
-    code: (p) => snippet("IconButton", { label: "검색", icon: `{${p.icon}}`, shape: p.shape === "round" ? undefined : p.shape, size: p.size === "md" ? undefined : p.size, tone: p.tone === "default" ? undefined : p.tone, tooltipSide: p.tooltipSide === "bottom" ? undefined : p.tooltipSide, hoverActive: p.hoverActive }),
   },
 
   {
@@ -618,7 +539,7 @@ export const STORIES: Story[] = [
       <div className="flex flex-wrap gap-4">
         {ICON_MOTIONS.map(([cls, Icon]) => (
           <span key={cls} className="flex flex-col items-center gap-1.5">
-            <Button shape="square" hoverActive icon={Icon} className={cls} aria-label={cls} />
+            <Button icon={Icon} className={cls} aria-label={cls} />
             <code className="font-mono text-[10px] text-ink-4">{cls.replace("icon-", "")}</code>
           </span>
         ))}
@@ -662,7 +583,6 @@ function ToastDemo() {
   return (
     <div className="flex flex-wrap gap-2">
       <Button
-        variant="grain"
         onClick={() =>
           toast.info("“문득 하나” 지웠어요", {
             label: "다시 적기",
@@ -672,10 +592,10 @@ function ToastDemo() {
       >
         되돌리기 액션
       </Button>
-      <Button variant="grain" tone="primary" onClick={() => toast.success("저장했어요")}>
+      <Button color="var(--color-primary)" onClick={() => toast.success("저장했어요")}>
         성공
       </Button>
-      <Button variant="grain" tone="danger" onClick={() => toast.error("실패했어요")}>
+      <Button color="var(--color-danger)" onClick={() => toast.error("실패했어요")}>
         실패
       </Button>
     </div>
@@ -727,12 +647,10 @@ function ModalDemo() {
   const [result, setResult] = useState("");
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Button variant="grain" onClick={() => modal.alert({ message: "저장했어요" })}>
+      <Button onClick={() => modal.alert({ message: "저장했어요" })}>
         alert
       </Button>
-      <Button
-        variant="grain"
-        tone="danger"
+      <Button color="var(--color-danger)"
         onClick={async () => {
           const ok = await modal.confirm({ message: "이 기록을 지울까요?", confirmLabel: "지우기", variant: "danger" });
           setResult(ok ? "지웠어요" : "그만뒀어요");
@@ -749,7 +667,7 @@ function ImageEditorDemo() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button variant="grain" tone="primary" onClick={() => setOpen(true)}>
+      <Button color="var(--color-primary)" onClick={() => setOpen(true)}>
         편집창 열기
       </Button>
       {open && (

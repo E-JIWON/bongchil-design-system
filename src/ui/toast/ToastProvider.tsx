@@ -258,10 +258,8 @@ function ToastCard({
           {item.action && (
             <span className="shrink-0" onClick={(e) => e.stopPropagation()}>
               <Button
-                variant="grain"
                 size="sm"
                 color={color}
-                hoverActive
                 onClick={() => {
                   item.action?.onClick();
                   onDismiss(item.id);

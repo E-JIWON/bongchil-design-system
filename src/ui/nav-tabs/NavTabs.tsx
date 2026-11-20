@@ -2,7 +2,6 @@
 
 import { Link } from "../../config";
 import { useEffect, useRef } from "react";
-import { grainAura, GrainNoise } from "../grain";
 
 /**
  * 상단 탭 — 그레인 오라 알약
@@ -91,15 +90,8 @@ export function NavTabs({ tabs }: { tabs: Tab[] }) {
 
   return (
     <nav ref={navRef} className="relative flex items-center gap-1 max-md:w-full max-md:gap-0.5">
-      {/* 표식 알약 — 재질은 칩 active와 같은 grainAura(soft), 좌표·움직임만 CSS(.nav-aura-pill)가 맡는다 */}
-      <span
-        ref={pillRef}
-        aria-hidden
-        className="nav-aura-pill"
-        style={grainAura("var(--color-primary)", true, true)}
-      >
-        <GrainNoise />
-      </span>
+      {/* 표식 알약 — 크레파스 칠 한 겹(테두리 없음), 좌표·움직임만 CSS(.nav-aura-pill)가 맡는다 */}
+      <span ref={pillRef} aria-hidden className="nav-aura-pill crayon-paint" />
       {tabs.map((t, i) => {
         const setRef = (el: HTMLElement | null) => {
           tabRefs.current[i] = el;

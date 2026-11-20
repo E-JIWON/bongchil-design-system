@@ -17,17 +17,16 @@ export { LiquidGlass, LiquidGlassDefs } from "./ui/liquid-glass";
 export { ModalProvider, useModal } from "./ui/modal";
 
 // ── 컨트롤 ──
-export { Button, TONE_COLOR } from "./ui/button";
-export type { ButtonProps, ButtonVariant, ButtonTone, ButtonShape, ButtonSize } from "./ui/button";
+export { Button } from "./ui/button";
+export type { ButtonProps, ButtonSize } from "./ui/button";
 export { TodoCheckbox } from "./ui/todo-checkbox";
 export { Toggle } from "./ui/toggle";
 export type { ToggleProps, ToggleSize } from "./ui/toggle";
 export { NavTabs } from "./ui/nav-tabs";
-export { IconButton } from "./ui/icon-button";
 export { Tooltip } from "./ui/tooltip";
 
 // ── 카테고리 ──
-export { CategoryChip, CategoryPill, CategoryMark, catTint, tokenColor } from "./ui/category";
+export { CategoryChip, categoryChip, CategoryMark, catTint, tokenColor } from "./ui/category";
 export type { CategoryColor } from "./ui/category";
 export { CategorySelect } from "./ui/category-select";
 export type { CategoryOption, CategorySelectSize, CategorySelectVariant } from "./ui/category-select";
@@ -82,7 +81,7 @@ export {
   CONTROL_SIZES,
   CONTROL_RADIUS,
 } from "./ui/grain";
-export type { ControlSize } from "./ui/grain";
+export type { ControlSize, Look } from "./ui/grain";
 
 // ── 앱이 채워 넣는 바깥 세계 (라우터 링크 · 이미지 업로드 · 프록시) ──
 export { configure } from "./config";

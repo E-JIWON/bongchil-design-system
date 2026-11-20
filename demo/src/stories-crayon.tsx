@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from "react";
-import { Bike, CalendarDays, Coffee, Home, PiggyBank, Settings, ShoppingBag, UtensilsCrossed } from "lucide-react";
-import { CrayonBar, CrayonCalendar, CrayonCheck, CrayonChip, CrayonCircle, CrayonColumns, CrayonFrame, CrayonNavItem, CrayonPen, CrayonSideTabs, CrayonStepper, CrayonSteps, CrayonTooltip, CrayonWash } from "bongchil-design-system/crayon";
+import { Bike, CalendarDays, Coffee, Home, Pencil, PiggyBank, Settings, ShoppingBag, UtensilsCrossed } from "lucide-react";
+import { Button } from "bongchil-design-system";
+import { CrayonBar, CrayonCalendar, CrayonCheck, CrayonCircle, CrayonColumns, CrayonFrame, CrayonNavItem, CrayonPen, CrayonSideTabs, CrayonStepper, CrayonSteps, CrayonTooltip, CrayonWash } from "bongchil-design-system/crayon";
 import { type Story } from "./controls";
 
 /* 크레용 타입 스토리 — 기존 스토리와 섞지 않고 네비의 "크레용" 쪽에만 뜬다 */
@@ -51,13 +52,24 @@ const CHIPS = [
   { k: "cafe", label: "카페", icon: <Coffee />, color: "#B5652E" },
   { k: "bike", label: "자전거", icon: <Bike />, color: "#6B9FC4" },
 ];
-function ChipDemo({ size }: { size: "sm" | "md" }) {
+/** 고르는 칩 줄 예시 — 칩은 Button 그대로라 모양 옵션은 Button 화면에서. 여기선 줄 간격만 */
+function ChipDemo({ gap }: { gap: number }) {
   const [one, setOne] = useState("food");
   const [off, setOff] = useState<string[]>(["cafe"]);
+  const row = { display: "flex", flexWrap: "wrap", gap } as const;
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap gap-1.5">{CHIPS.map((c) => <CrayonChip key={c.k} size={size} on={one === c.k} color={c.color} icon={c.icon} onClick={() => setOne(c.k)}>{c.label}</CrayonChip>)}</div>
-      <div className="flex flex-wrap gap-1.5">{CHIPS.map((c) => <CrayonChip key={c.k} size={size} struck on={!off.includes(c.k)} color={c.color} icon={c.icon} onClick={() => setOff((o) => (o.includes(c.k) ? o.filter((x) => x !== c.k) : [...o, c.k]))}>{c.label}</CrayonChip>)}</div>
+      {/* 하나 고르기 — 칠 없는 기본: 고르면 크레파스 면 */}
+      <div style={row}>{CHIPS.map((c) => <Button key={c.k} fill={false} on={one === c.k} color={c.color} icon={c.icon} onClick={() => setOne(c.k)}>{c.label}</Button>)}</div>
+      {/* 하나 고르기 — 칠해 둔 줄: 고르면 손그림 동그라미 */}
+      <div style={row}>{CHIPS.map((c) => <Button key={c.k} on={one === c.k} color={c.color} icon={c.icon} onClick={() => setOne(c.k)}>{c.label}</Button>)}</div>
+      {/* 여럿 켜고 끄기 — 꺼진 칩은 아이콘까지 취소선 */}
+      <div style={row}>{CHIPS.map((c) => <Button key={c.k} fill={false} struck on={!off.includes(c.k)} color={c.color} icon={c.icon} onClick={() => setOff((o) => (o.includes(c.k) ? o.filter((x) => x !== c.k) : [...o, c.k]))}>{c.label}</Button>)}</div>
+      {/* 같은 너비 칸 + 직접 적기 — 칸 배치는 부르는 쪽 몫 */}
+      <div className="grid grid-cols-3 max-sm:grid-cols-2" style={{ gap }}>
+        {CHIPS.slice(0, 3).map((c) => <Button key={c.k} fill={false} on={one === c.k} color={c.color} icon={c.icon} onClick={() => setOne(c.k)} className="w-full">{c.label}</Button>)}
+        <Button add icon={<Pencil />} className="col-span-full w-full">직접 적기</Button>
+      </div>
     </div>
   );
 }
@@ -466,12 +478,18 @@ export const CRAYON_STORIES: Story[] = [
   {
     id: "crayon-chip",
     group: "컨트롤",
-    name: "CrayonChip (고르는 칩)",
+    name: "고르는 칩 (Button on)",
+    see: [{ id: "button", label: "Button — 모양 옵션은 여기서" }],
     fresh: true,
-    notes: ["아이콘 · 이름 — 고르면 그 색(color) 크레파스 면 + 진한 글자, 아이콘도 그 색. 아니면 얇은 테두리", "하나 고르기(카테고리 · 계좌)와 여럿 켜고 끄기 모두 — struck면 꺼진 칩에 취소선", "켤 때 굵기가 그대로라 폭이 안 흔들림. 모서리 10px(sm 8px)", "아이콘에 색을 직접 주지 말 것 — 칩이 칠함 · aria-pressed"],
-    controls: [{ key: "size", type: "select", options: [{ value: "md", label: "md" }, { value: "sm", label: "sm" }] }],
-    render: (p) => <ChipDemo size={(p.size as "sm" | "md") ?? "md"} />,
-    code: () => `<CrayonChip on={picked === c.id} color={c.color} icon={<CategoryIcon categoryKey={c.icon} />} onClick={() => pick(c.id)}>\n  {c.name}\n</CrayonChip>\n<CrayonChip struck on={!off.includes(c.id)} …>`,
+    notes: [
+      "칩은 따로 없다 — 고른 상태(on)를 준 Button이다. 크기 · 칠 · 건수 · 아이콘만 같은 모양 옵션은 Button 화면에서",
+      "줄마다: 칠 없는 기본(고르면 면) · 칠해 둔 줄(고르면 동그라미) · 켜고 끄기(꺼지면 아이콘까지 취소선) · 같은 너비 칸 + 직접 적기",
+      "여기서 고르는 건 칩 사이 간격(gap)만 — 칸 배치는 부르는 쪽 몫",
+    ],
+    controls: [{ key: "gap", type: "number", min: 2, max: 16 }],
+    initial: { gap: 6 },
+    render: (p) => <ChipDemo gap={Number(p.gap) || 6} />,
+    code: () => `<Button fill={false} on={picked === c.id} color={c.color} icon={<CategoryIcon categoryKey={c.icon} />} onClick={() => pick(c.id)}>\n  {c.name}\n</Button>`,
   },
   {
     id: "crayon-side-tabs",

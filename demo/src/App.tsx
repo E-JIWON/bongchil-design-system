@@ -14,7 +14,6 @@ const TWINS: Record<string, string> = {
   "todo-checkbox": "crayon-check",
   "nav-tabs": "crayon-wash",
   "notice-area": "crayon-frame",
-  "category-pill": "crayon-chip",
 };
 const twinOf = (id: string) => CRAYON_STORIES.find((s) => s.id === TWINS[id]);
 const isCrayon = (s: Story) => CRAYON_STORIES.includes(s);
@@ -182,15 +181,14 @@ export function App() {
         </nav>
 
         <div className="flex flex-wrap items-center gap-1.5 px-3 py-3">
-          <Button variant="grain" size="xs" icon={dark ? Moon : Sun} active={dark} onClick={toggleDark}>
+          <Button size="xs" icon={dark ? Moon : Sun} on={dark} onClick={toggleDark}>
             {dark ? "다크" : "라이트"}
           </Button>
           {ACCENTS.map((a) => (
             <Button
               key={a.label}
-              variant="grain"
               size="xs"
-              active={accent === a.value}
+              on={accent === a.value}
               onClick={() => pickAccent(a.value)}
             >
               {a.label}
@@ -218,6 +216,17 @@ export function App() {
                 )),
               )}
             </ul>
+          )}
+
+          {story.see && (
+            <p className="mt-2 flex flex-wrap gap-x-3 text-[12px] text-ink-4">
+              같이 보기
+              {story.see.map((l) => (
+                <a key={l.id} href={`#${l.id}`} className="text-primary underline decoration-primary/30 underline-offset-2 hover:decoration-primary">
+                  {l.label} →
+                </a>
+              ))}
+            </p>
           )}
 
           {twin && (

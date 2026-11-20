@@ -448,11 +448,8 @@ export function ImageEditor({ file, src, onDone, onCancel, initialRatio = "3:4",
                   : "불러오는 중"}
               </p>
             </div>
-            <Button
-              shape="square"
+            <Button fill={false}
               size="sm"
-              hoverActive
-              tone="muted"
               onClick={onCancel}
               aria-label={step ? "이 사진 건너뛰기" : "닫기"}
               icon={<X size={14} strokeWidth={2} />}
@@ -461,12 +458,11 @@ export function ImageEditor({ file, src, onDone, onCancel, initialRatio = "3:4",
 
           <div className="mt-2 grid grid-cols-2 gap-1.5">
             {RATIO_OPTIONS.map((r) => (
-              <Button
+              <Button fill={false}
                 key={r.key}
-                variant="dotted"
                 size="sm"
                 color="var(--color-primary)"
-                active={!fullArea && ratio === r.key}
+                on={!fullArea && ratio === r.key}
                 icon={r.icon}
                 onClick={() => {
                   setFullArea(false);
@@ -479,11 +475,10 @@ export function ImageEditor({ file, src, onDone, onCancel, initialRatio = "3:4",
               </Button>
             ))}
             {/* 전체 영역 — 사진 끝까지 끌지 않고 한 번에 통째로 */}
-            <Button
-              variant="dotted"
+            <Button fill={false}
               size="sm"
               color="var(--color-primary)"
-              active={fullArea}
+              on={fullArea}
               icon={Expand}
               disabled={!imgLoaded}
               onClick={() => {
@@ -498,9 +493,7 @@ export function ImageEditor({ file, src, onDone, onCancel, initialRatio = "3:4",
 
             {/* 비율은 '고르는 것', 돌리기는 '누르면 실행'이라 재질을 갈라 둔다 */}
             <Button
-              variant="grain"
               size="sm"
-              hoverActive
               color="var(--color-primary)"
               disabled={!imgLoaded}
               onClick={handleRotate}
@@ -527,7 +520,7 @@ export function ImageEditor({ file, src, onDone, onCancel, initialRatio = "3:4",
               <span className="text-[11px] tabular-nums text-ink-4">
                 {step.index} / {step.total}
               </span>
-              <Button variant="text" size="sm" tone="muted" onClick={onCancel}>건너뛰기</Button>
+              <Button fill={false} size="sm" onClick={onCancel}>건너뛰기</Button>
             </div>
           )}
 
@@ -557,10 +550,7 @@ export function ImageEditor({ file, src, onDone, onCancel, initialRatio = "3:4",
 
           {/* 되돌리는 것이 위, 확정하는 것이 맨 아래 — 손가락이 마지막에 닿는 자리를 '적용'이 갖는다 */}
           {!step && (
-            <Button
-              variant="grain"
-              tone="muted"
-              hoverActive
+            <Button fill={false}
               className="w-full"
               style={{ borderRadius: "var(--radius-s)" }}
               onClick={onCancel}
@@ -568,9 +558,7 @@ export function ImageEditor({ file, src, onDone, onCancel, initialRatio = "3:4",
               취소
             </Button>
           )}
-          <Button
-            variant="grain"
-            tone="primary"
+          <Button color="var(--color-primary)"
             className="w-full"
             style={{ borderRadius: "var(--radius-s)" }}
             onClick={handleApply}

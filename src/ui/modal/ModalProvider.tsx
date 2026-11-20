@@ -12,7 +12,7 @@ import {
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { Button } from "../button";
-import { IconButton } from "../icon-button";
+
 
 /* ── Types ── */
 
@@ -190,8 +190,8 @@ export function ModalProvider({
                 {state.options.showClose && (
                   /* Tooltip 래퍼가 relative라 위치는 바깥 div가 잡는다 */
                   <div className="absolute right-3 top-3 z-[1]">
-                    <IconButton
-                      label="닫기"
+                    <Button
+                      tooltip="닫기"
                       onClick={() => dismiss(false)}
                       icon={<X size={16} />}
                     />
@@ -236,8 +236,7 @@ export function ModalProvider({
                     // 폭은 30%를 바닥으로만 잡는다 — w-[30%] 고정이면 4자 넘는 라벨
                     // ("머무를래요"·"계속 쓸게요")이 두 줄로 쪼개진다. 길면 그만큼 넓어지고
                     // 확인(flex-1)이 남은 폭을 가져간다
-                    <Button
-                      variant="text"
+                    <Button fill={false}
                       onClick={() => dismiss(false)}
                       className="min-w-[30%] shrink-0 justify-center whitespace-nowrap"
                     >
@@ -245,14 +244,12 @@ export function ModalProvider({
                     </Button>
                   )}
                   <Button
-                    variant="grain"
-                    tone={
+                    color={
                       state.type === "confirm" && state.options.variant === "danger"
-                        ? "danger"
-                        : "primary"
+                        ? "var(--color-danger)"
+                        : "var(--color-primary)"
                     }
                     onClick={() => dismiss(true)}
-                    hoverActive
                     className="flex-1 justify-center"
                   >
                     {state.options.confirmLabel ?? "확인"}

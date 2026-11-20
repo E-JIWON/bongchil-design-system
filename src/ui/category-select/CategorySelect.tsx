@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useSyncExternalStore, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import { ChevronDown, Check, type LucideIcon } from "lucide-react";
-import { LiquidGlass } from "../liquid-glass";
+import { Button } from "../button";
 import { BasicGlass } from "../basic-glass";
 import { GrainNoise, grainAura, grainText, CONTROL_SIZES, type ControlSize } from "../grain";
 import { AnchoredPop, type PopAnchor } from "../anchored-pop";
@@ -34,21 +34,6 @@ export type CategorySelectSize = ControlSize;
  */
 export type CategorySelectVariant = "liquid" | "grain" | "dotted" | "text" | "crayon";
 
-/**
- * 중앙 그레인 오라 — 색이 가운데(50% 50%)서 좌우로 번진다.
- * 농도 기준: **액티브가 칩의 "기본" 농도**, 비액티브는 거기서 한 단계 더 옅게.
- * (액티브를 진하게 칠하면 셀렉트가 CTA 버튼처럼 튄다 — 셀렉트는 고르는 자리지 누르는 자리가 아니다)
- */
-function centerGrainAura(color: string, on: boolean): CSSProperties {
-  return {
-    background: on
-      ? `radial-gradient(70% 220% at 50% 50%, color-mix(in srgb, ${color} 44%, var(--aura-tint, #ffffff)), color-mix(in srgb, ${color} 10%, transparent))`
-      : `radial-gradient(70% 220% at 50% 50%, color-mix(in srgb, ${color} 26%, var(--aura-idle-tint, #ffffff)), color-mix(in srgb, ${color} 6%, transparent))`,
-    boxShadow: on
-      ? `0 2px 10px color-mix(in srgb, ${color} var(--aura-glow-soft, 18%), transparent)`
-      : "0 1px 6px var(--aura-idle-shadow, rgb(var(--shadow-ink)/0.06))",
-  };
-}
 
 /** 드롭다운 패널 쪽 치수만 사이즈별로 따로 — 트리거는 `CONTROL_SIZES`를 그대로 쓴다 */
 const MENU: Record<CategorySelectSize, { text: string; pad: string }> = {
@@ -292,10 +277,8 @@ export function CategorySelect({
     }
   }
 
-  const grain = variant === "grain";
   const triggerColor = selected?.cssColor ?? "var(--color-primary)";
   const innerGap = sz.gap;
-  const trigger = `${sz.h} ${sz.gap} ${sz.px} ${sz.text}`;
 
   /**
    * 옵션 행 — 목록은 목록으로 읽혀야 하므로 **idle 행엔 표면을 주지 않는다**
@@ -400,41 +383,7 @@ export function CategorySelect({
   };
 
   let triggerNode: React.ReactNode;
-  if (grain) {
-    triggerNode = (
-      <button
-        {...triggerProps}
-        className={`relative flex items-center overflow-hidden rounded-[10px] font-semibold transition-all ${trigger}`}
-        style={{
-          ...centerGrainAura(triggerColor, open),
-          color: grainText(triggerColor, open),
-          // 열림 = grain active와 같은 파선 언어.
-          // ⚠️ 닫힘일 때도 같은 굵기의 outline을 transparent로 미리 깔아둔다 —
-          // 없다가 생기면 transition-all이 outline-width를 0→1.5px로 애니메이션해서 테두리가 움틀거린다.
-          outline: `1.5px dashed ${open ? `color-mix(in srgb, ${grainText(triggerColor, true)} 45%, transparent)` : "transparent"}`,
-          outlineOffset: "-1.5px",
-        }}
-      >
-        <GrainNoise />
-        <span className={`relative flex min-w-0 items-center ${innerGap}`}>{triggerInner}</span>
-      </button>
-    );
-  } else if (variant === "dotted") {
-    triggerNode = (
-      <button
-        {...triggerProps}
-        className={`flex items-center rounded-[10px] border-[1.5px] font-semibold transition-colors ${trigger}`}
-        style={{
-          color: triggerColor,
-          borderStyle: open ? "solid" : "dashed",
-          borderColor: `color-mix(in srgb, ${triggerColor} ${open ? 65 : 45}%, transparent)`,
-          background: open ? `color-mix(in srgb, ${triggerColor} 13%, transparent)` : undefined,
-        }}
-      >
-        <span className={`flex min-w-0 items-center ${innerGap}`}>{triggerInner}</span>
-      </button>
-    );
-  } else if (variant === "text" || variant === "crayon") {
+  if (variant === "text" || variant === "crayon") {
     // 표면 없음 — 밑줄만. Button variant="text"와 같은 방식(내용 span의 border-bottom)
     const c = selected?.cssColor ?? "var(--color-ink)";
     triggerNode = (
@@ -452,24 +401,18 @@ export function CategorySelect({
       </button>
     );
   } else {
-    /* 리퀴드 — 트리거만 LiquidGlass(패널은 어느 재질이든 BasicGlass) */
+    // 크레용 Button 한 몸 — 고른 항목 색으로 칠(grain · liquid), dotted는 칠 없이. 끝 슬롯에 펼침 화살표
     triggerNode = (
-      <LiquidGlass
-        as="button"
+      <Button
         {...triggerProps}
-        className={`flex items-center rounded-[10px] text-ink transition-all ${trigger}`}
-        style={{
-          // 유리 위 원색은 옅은 색(모래·민트)에서 안 읽힌다 → grainText로 한 번 깊게 눌러 쓴다
-          ...(selected?.cssColor ? { color: grainText(selected.cssColor, true) } : null),
-          // 링은 outline으로 — box-shadow로 주면 `.date-picker-glass`의 8겹 inset 광택을 통째로 덮어
-          // 열리는 순간 유리 재질이 사라졌다 돌아온다. 닫힘일 땐 transparent로 굵기만 미리 잡아둔다.
-          outline: `2px solid ${open ? "var(--color-primary-subtle)" : "transparent"}`,
-          outlineOffset: 0,
-        }}
-        contentClassName={`flex min-w-0 items-center ${innerGap}`}
+        size={size}
+        color={triggerColor}
+        fill={variant !== "dotted"}
+        icon={selected ? <OptionMark key={selected.value} className="select-mark-pop" option={selected} size={sz.iconSize} lit /> : undefined}
+        count={<ChevronDown size={12} strokeWidth={2.5} className={`shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />}
       >
-        {triggerInner}
-      </LiquidGlass>
+        {selected?.label ?? placeholder}
+      </Button>
     );
   }
 

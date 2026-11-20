@@ -111,24 +111,112 @@
 /* 툴팁 (CrayonTooltip): 올리거나 키보드로 포커스하면 이름표(누른 뒤 남은 포커스엔 안 뜸). 옅은 잉크 크레파스 면(#pastel-block — 작은 면에 구멍 덜 남) + 진한 글자, 그림자 없음.
    보일 땐 0.25초 기다림(아이콘 줄을 훑을 때 깜빡이지 않게), 숨길 땐 바로 */
 .crayon-tip{position:relative;display:inline-flex}
-.crayon-tip-label{pointer-events:none;position:absolute;left:50%;top:calc(100% + 6px);z-index:50;isolation:isolate;padding:3px 8px;white-space:nowrap;font-size:11px;font-weight:500;line-height:16px;color:var(--color-ink-2);opacity:0;translate:-50% -3px;transition:opacity .15s,translate .15s cubic-bezier(.23,1,.32,1)}
+.crayon-tip-label{pointer-events:none;position:absolute;left:50%;top:calc(100% + 6px);z-index:50;isolation:isolate;padding:3px 8px;white-space:nowrap;font-size:11px;font-weight:500;line-height:16px;color:var(--color-ink);opacity:0;translate:-50% -3px;transition:opacity .15s,translate .15s cubic-bezier(.23,1,.32,1)}
 .crayon-tip-label[data-side=top]{top:auto;bottom:calc(100% + 6px);translate:-50% 3px}
-.crayon-tip-label::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:5px;background-color:color-mix(in oklab,var(--crayon,var(--color-ink)) 11%,var(--color-surface));background-image:repeating-linear-gradient(-7deg,transparent 0 2px,rgb(255 255 255 / .18) 2px 3px,transparent 3px 5px);filter:url(#pastel-block)}
+.crayon-tip-label::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:6px;box-shadow:0 2px 8px rgb(var(--shadow-ink,20 18 16) / .1);background-color:color-mix(in oklab,var(--crayon,var(--color-ink)) 26%,var(--color-surface));background-image:repeating-linear-gradient(-7deg,transparent 0 2px,rgb(255 255 255 / .18) 2px 3px,transparent 3px 5px);filter:url(#pastel-block)}
 .crayon-tip:hover>.crayon-tip-label,.crayon-tip:has(:focus-visible)>.crayon-tip-label{opacity:1;translate:-50% 0;transition-delay:.25s}
 
-@media (prefers-reduced-motion:reduce){.crayon-tip-label{transition:opacity .15s}.crayon-wash::before{animation:none}.crayon-bar>.crayon-fill{transition:none}.crayon-draw{animation:none}}
-/* 고르는 칩 — 테두리만 → 고르면 그 색 크레파스 면(#crayon 결). 굵기는 늘 같게(폭 흔들림 없음) */
-.crayon-chip{position:relative;isolation:isolate;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border:1px solid var(--color-border);border-radius:10px;background:none;font:inherit;font-size:13px;font-weight:600;line-height:1;color:var(--color-ink-2);white-space:nowrap;cursor:pointer;user-select:none;transition:color .15s,border-color .15s,transform .12s}
-.crayon-chip>svg{flex:none;width:14px;height:14px;color:var(--color-ink-4);transition:color .15s}
+/* 모인 툴팁(CrayonTooltipGroup) — 이름표 하나가 버튼 사이를 미끄러진다. 위치는 transform, 폭은 width — 같은 곡선 */
+.crayon-tip-group{position:relative}
+.crayon-tip-group>.crayon-tip-label{animation:none;box-sizing:border-box;left:0;top:0;overflow:hidden;text-align:center;translate:0 -3px}
+.crayon-tip-group>.crayon-tip-label[data-side=top]{top:0;bottom:auto;translate:0 3px}
+.crayon-tip-group>.crayon-tip-label[data-side=right]{translate:-3px 0}
+.crayon-tip-group>.crayon-tip-label[data-shown]{opacity:1;translate:0 0;transition-delay:0s}
+.crayon-tip-group>.crayon-tip-label[data-slide]{transition:opacity .15s,translate .15s,transform .3s cubic-bezier(.22,1,.36,1),width .3s cubic-bezier(.22,1,.36,1)}
+.crayon-tip-ruler{visibility:hidden;opacity:0;left:0;top:0;width:auto!important}
+.crayon-tip-text{display:block}
+.crayon-tip-out{position:absolute;inset:3px 8px;animation:crayon-tip-out .14s ease-out forwards}
+.crayon-tip-in{animation:crayon-tip-in .18s cubic-bezier(.22,1,.36,1)}
+@keyframes crayon-tip-out{to{opacity:0;filter:blur(2px)}}
+@keyframes crayon-tip-in{from{opacity:0;filter:blur(2px)}}
+@media (prefers-reduced-motion:reduce){.crayon-tip-label{transition:opacity .15s!important}.crayon-tip-out,.crayon-tip-in{animation:none}.crayon-wash::before{animation:none}.crayon-bar>.crayon-fill{transition:none}.crayon-draw{animation:none}}
+/* 고르는 칩 (PickChip) — 크기 · 글자 · 아이콘 · 모서리는 버튼(CONTROL_SIZES md · sm)과 같다. 고른 표시는 두 가지 중 하나.
+   기본: 평소엔 이름만 → 고르면 그 색 크레파스 면(32%).
+   fill: 평소에도 그 색을 옅게 칠해 둠(16%) → 고르면 손그림 동그라미 두 바퀴가 그려짐(칠은 그대로).
+   add: 「직접 적기 · + 추가」처럼 아직 없는 걸 새로 만드는 칩 — 크레파스 점선 + 회색 아이콘. 켜지면(적는 중) 칠.
+   칠 결은 #pastel. 테두리 자리는 늘 1px 투명이라 고를 때 폭이 안 흔들린다 */
+.crayon-chip{position:relative;isolation:isolate;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 14px;border:1px solid transparent;border-radius:10px;background:none;font:inherit;font-size:11.5px;font-weight:500;letter-spacing:-.01em;line-height:1;color:var(--color-ink-2);white-space:nowrap;cursor:pointer;user-select:none;justify-content:center;transition:color .15s}
+/* 아이콘 = 이름 · 건수 · 동그라미가 아닌 자식(svg든 span으로 감쌌든). 아이콘에 인라인 color를 주면 칩 칠이 못 이긴다 */
+.crayon-chip>:not(.crayon-chip-label,.crayon-chip-count,.crayon-chip-loop){flex:none;color:var(--color-ink-4);transition:color .15s}
+.crayon-chip>svg,.crayon-chip>span>svg{width:13px;height:13px}
 .crayon-chip-label{min-width:0;overflow:hidden;text-overflow:ellipsis}
-.crayon-chip:hover{border-color:var(--color-border-strong);color:var(--color-ink)}
-.crayon-chip:active{transform:scale(.97)}
+/* 건수 · 끝 슬롯(count) — 이름 밖이라 말줄임 · 취소선에 안 걸린다 */
+.crayon-chip-count{flex:none;font-size:.9em;font-weight:500;font-variant-numeric:tabular-nums;color:var(--color-ink-4)}
+.crayon-chip:where(:not([data-still])):hover{color:var(--color-ink)}
+/* 누를 때 줄이지 않는다 — 줄었다 돌아오며 글자가 흔들려 보였다(11.20) */
 .crayon-chip:focus-visible{outline:2px solid color-mix(in oklab,var(--crayon,var(--color-primary)) 50%,transparent);outline-offset:1px}
-.crayon-chip[aria-pressed=true],.crayon-chip[aria-selected=true]{border-color:transparent;color:var(--color-ink)}
-.crayon-chip[aria-pressed=true]>svg,.crayon-chip[aria-selected=true]>svg{color:var(--crayon,var(--color-primary))}
-.crayon-chip[aria-pressed=true]::before,.crayon-chip[aria-selected=true]::before{content:"";position:absolute;inset:-1px;z-index:-1;border-radius:inherit;background:color-mix(in oklab,var(--crayon,var(--color-primary)) 22%,transparent);filter:url(#crayon)}
-.crayon-chip-sm{height:30px;padding:0 10px;gap:5px;border-radius:8px;font-size:12.5px}
-.crayon-chip-sm>svg{width:13px;height:13px}
-.crayon-chip-struck[aria-pressed=false]{color:var(--color-ink-4)}
-.crayon-chip-struck[aria-pressed=false]>span{text-decoration:line-through;text-decoration-color:color-mix(in oklab,var(--color-ink-4) 50%,transparent)}
-@media (prefers-reduced-motion:reduce){.crayon-chip{transition:none}}
+/* 켜짐 = data-on(PickChip이 늘 단다 · 손으로 쓸 땐 값 없이 붙이기) · 손으로 클래스만 쓰는 곳을 위해 aria-pressed/selected/checked도 같이 */
+.crayon-chip:is([data-on],[aria-pressed=true],[aria-selected=true],[aria-checked=true]){color:var(--color-ink)}
+.crayon-chip:is([data-on],[aria-pressed=true],[aria-selected=true],[aria-checked=true])>:not(.crayon-chip-label,.crayon-chip-count,.crayon-chip-loop),.crayon-chip[data-icon=always]>:not(.crayon-chip-label,.crayon-chip-count,.crayon-chip-loop){color:var(--crayon,var(--color-primary))}
+.crayon-chip-sm{height:28px;padding:0 10px;gap:5px;border-radius:10px;font-size:11px}
+.crayon-chip-sm>svg,.crayon-chip-sm>span>svg{width:12px;height:12px}
+/* 아이콘만(이름 없음) — 정사각(높이 = 폭, 호출부 !size-*도 그대로 먹음). 건수가 붙으면 그만큼 넓어진다 */
+.crayon-chip-icon{aspect-ratio:1;padding:0}
+.crayon-chip-icon:has(>.crayon-chip-count){aspect-ratio:auto;padding:0 8px}
+.crayon-chip-struck:not([data-on],[aria-pressed=true],[aria-selected=true],[aria-checked=true]){color:var(--color-ink-4)}
+/* 취소선은 아이콘까지 가로지른다(이름에만 긋지 않음) */
+.crayon-chip-struck:not([data-on],[aria-pressed=true],[aria-selected=true],[aria-checked=true])::after{content:"";position:absolute;left:8px;right:8px;top:50%;height:1.5px;border-radius:1px;background:color-mix(in oklab,var(--color-ink-4) 65%,transparent);pointer-events:none}
+/* 누를 수 없는 칩(still) — 보여 주기만 */
+.crayon-chip[data-still]{cursor:default}
+/* 칠 — 기본 칩은 켜지면 32%, fill 칩은 늘 16% */
+/* 크레용 칠 — 버튼(look 크레용)과 고르는 칩이 한 몸(.crayon-chip). 진하기는 --crayon-paint
+   칠 없는 버튼: 겨냥 10% · 켜지면 32% / 칠한 버튼(fill): 평소 16% · 겨냥 22% · 켜지면 동그라미 */
+.crayon-chip:is([data-on],[aria-pressed=true],[aria-selected=true],[aria-checked=true]):not([data-fill])::before,.crayon-chip[data-fill]::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;background-color:color-mix(in oklab,var(--crayon,var(--color-primary)) var(--crayon-paint,32%),transparent);background-image:repeating-linear-gradient(-7deg,transparent 0 2px,rgb(255 255 255 / .2) 2px 3px,transparent 3px 5px);filter:url(#pastel)}
+.crayon-chip[data-fill]{--crayon-paint:16%}
+.crayon-chip[data-fill]:where(:not([data-still])):hover{--crayon-paint:22%}
+/* 아무 요소에나 크레파스 칠 한 겹(움직이는 표식 알약 등) — 색 --crayon, 진하기 --crayon-paint(기본 26%) */
+.crayon-paint{isolation:isolate}
+.crayon-paint::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;background-color:color-mix(in oklab,var(--crayon,var(--color-primary)) var(--crayon-paint,26%),transparent);background-image:repeating-linear-gradient(-7deg,transparent 0 2px,rgb(255 255 255 / .2) 2px 3px,transparent 3px 5px);filter:url(#pastel)}
+/* 동그라미(fill 칩의 고른 표시): 길을 따라 두 바퀴 차례로(한 바퀴 .34s), 끄면 흐려지며 사라진다 */
+.crayon-chip>.crayon-chip-loop{position:absolute;inset:-4px -6px;pointer-events:none;color:color-mix(in oklab,var(--crayon,var(--color-primary)) 78%,transparent);transition:opacity .18s}
+.crayon-chip>.crayon-chip-loop>svg{display:block;width:100%;height:100%;overflow:visible}
+.crayon-chip-loop path{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1 1;stroke-dashoffset:1}
+.crayon-chip:not([data-on],[aria-pressed=true],[aria-selected=true],[aria-checked=true])>.crayon-chip-loop{opacity:0}
+.crayon-chip:is([data-on],[aria-pressed=true],[aria-selected=true],[aria-checked=true])>.crayon-chip-loop path{stroke-dashoffset:0;transition:stroke-dashoffset .34s cubic-bezier(.3,0,.3,1)}
+.crayon-chip:is([data-on],[aria-pressed=true],[aria-selected=true],[aria-checked=true])>.crayon-chip-loop path+path{transition-delay:.34s}
+/* add — 크레파스 점선 + 작은 회색 아이콘. 켜지면 점선 없이 칠 */
+.crayon-chip[data-add]::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;border:1.5px dashed color-mix(in oklab,var(--color-ink-4) var(--chip-dash,60%),transparent);filter:url(#pastel-line)}
+.crayon-chip[data-add]:where(:not([data-still])):hover{--chip-dash:100%}
+.crayon-chip[data-add]:not(.crayon-chip-xs,.crayon-chip-lg)>svg,.crayon-chip[data-add]:not(.crayon-chip-xs,.crayon-chip-lg)>span>svg{width:12px;height:12px}
+.crayon-chip[data-add]:not([data-on],[aria-pressed=true],[aria-selected=true],[aria-checked=true])>:not(.crayon-chip-label,.crayon-chip-count,.crayon-chip-loop){color:var(--color-ink-3)}
+.crayon-chip[data-add]:is([data-on],[aria-pressed=true],[aria-selected=true],[aria-checked=true])::after{content:none}
+
+/* 크기 xs · lg (md 32 · sm 28은 위) — 버튼 크기표(CONTROL_SIZES)와 같다 */
+.crayon-chip-xs{height:24px;padding:0 8px;gap:4px;border-radius:8px;font-size:10.5px}
+.crayon-chip-xs>svg,.crayon-chip-xs>span>svg{width:11px;height:11px}
+.crayon-chip-lg{height:36px;padding:0 16px;font-size:12.5px}
+.crayon-chip-lg>svg,.crayon-chip-lg>span>svg{width:14px;height:14px}
+/* 칠 없는 버튼을 겨냥하면 옅은 칠이 올라온다(예전 hoverActive 자리) */
+.crayon-chip:not([data-fill],[data-add],[data-still]):not([data-on],[aria-pressed=true],[aria-selected=true],[aria-checked=true]):where(:hover,:focus-visible)::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;background-color:color-mix(in oklab,var(--crayon,var(--color-primary)) 10%,transparent);filter:url(#pastel)}
+.crayon-chip:where(:not([data-still])):active{transform:translateY(-1px)}
+/* 아이콘 칸(이름 없음)은 칠해 둬도 켜지면 동그라미 대신 진한 칠 */
+.crayon-chip-icon[data-fill]:is([data-on],[aria-pressed=true],[aria-selected=true],[aria-checked=true]){--crayon-paint:32%}
+/* 앱의 아이콘 hover 모션(svg 회전 등)이 동그라미에 옮지 않게 */
+.crayon-chip-loop svg{transform:none!important;animation:none!important}
+@media (prefers-reduced-motion:reduce){.crayon-chip{transition:none}.crayon-chip-loop path{transition:none!important}}
+
+/* ===== look="crayon" — BDS 부품 크레용판 (Button grain · FilterChips · Toggle · BasicGlass) =====
+   @layer components: 크기·radius·그림자는 부품/호출부의 Tailwind 유틸이 이긴다(기존 .crayon-chip처럼 높이를 박지 않는다).
+   필터는 가상 요소에만 — <CrayonDefs /> 없어도 몸체·글자는 보이고 칠 결만 빠진다.
+   글자는 ink-2 이상, 아이콘은 ink-3 이상. 누르면 작아지는 대신 1px 떠오른다.
+   ⚠️ 앱은 crayon.css를 `@import "tailwindcss"` 뒤에서 불러야 한다(앞이면 preflight의 border:0이 테두리를 지운다) */
+@layer components{
+/* 테두리 없음이 원칙 — 겨냥(hover · hoverActive)은 칠을 조금 진하게, 켜짐 · CTA는 두 배로 */
+
+/* 토글: 켜짐 = 크레파스 칠, 꺼짐 = 성긴 빗금 + 연한 테두리. 칠은 면의 ::before에만(체크 아이콘은 안 흔들림) */
+.crayon-lift{transition:transform .15s cubic-bezier(.23,1,.32,1)}
+.crayon-lift:active{transform:translateY(-1px)}
+.crayon-toggle-on,.crayon-toggle-off{isolation:isolate}
+.crayon-toggle-on::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background-color:color-mix(in oklab,var(--crayon,var(--color-primary)) 90%,var(--color-surface));background-image:repeating-linear-gradient(-7deg,transparent 0 2px,rgb(255 255 255 / .18) 2px 3px,transparent 3px 5px);filter:url(#pastel)}
+.crayon-toggle-off{background:var(--color-surface);box-shadow:inset 0 0 0 1px var(--color-border-strong)}
+.crayon-toggle-off::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;opacity:.4;background-image:repeating-linear-gradient(-55deg,color-mix(in oklab,var(--crayon,var(--color-primary)) 56%,transparent) 0 1.8px,transparent 1.8px 5.5px);filter:url(#pastel-line)}
+
+/* 표면(BasicGlass): 불투명 종이 + 고운 종이 결 + 연한 보더 + 짧고 옅은 그림자. blur 없음.
+   position:relative는 레이어 안이라 호출부의 fixed · absolute 유틸이 이긴다 */
+.crayon-sheet{position:relative;isolation:isolate;background-color:var(--color-surface);border:1px solid var(--color-border);box-shadow:0 2px 8px rgb(var(--shadow-ink,20 18 16) / .06)}
+.crayon-sheet::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='128' height='128' filter='url(%23p)' opacity='0.09'/%3E%3C/svg%3E");background-size:128px 128px}
+.crayon-sheet-warm{background-color:color-mix(in oklab,var(--color-surface-warm) 60%,var(--color-surface))}
+.crayon-sheet-flat{box-shadow:none}
+}
+/* 포커스 링은 레이어 밖 — 앱의 전역 `:focus-visible{outline:none}`(unlayered)에 지지 않게 */
+@media (prefers-reduced-motion:reduce){.crayon-lift{transition:none}.crayon-lift:active{transform:none}}
